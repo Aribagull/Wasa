@@ -44,7 +44,7 @@ export default function TicketTabs() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 h-[510px] overflow-y-auto">
              
-            <div className="bg-white p-4 rounded shadow custom-scrollbar">
+            <div className="bg-white p-4 custom-scrollbar">
               {openTickets.length === 0 ? (
                 <p className="text-gray-500">No open tickets.</p>
               ) : (
@@ -77,7 +77,7 @@ export default function TicketTabs() {
             </div>
 
       
-            <div className="bg-white p-4 rounded shadow custom-scrollbar">
+            <div className="bg-white p-4 custom-scrollbar">
               {closedTickets.length === 0 ? (
                 <p className="text-gray-500">No closed tickets.</p>
               ) : (

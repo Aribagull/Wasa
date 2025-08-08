@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { BiSolidUserDetail } from "react-icons/bi";
 
+import { releaseTicket } from "../API/index.js";
+
 export default function ApprovalAction({ isOpen, onClose, row, onUpdateStatus }) {
   const [showModal, setShowModal] = useState(false);
   const [animateIn, setAnimateIn] = useState(false);
@@ -33,42 +35,25 @@ export default function ApprovalAction({ isOpen, onClose, row, onUpdateStatus })
       return;
     }
 
-    try {
-      const token = localStorage.getItem("authToken"); 
+    const result = await releaseTicket({
+      surveyorId: survey_data?.surveyor_id,
+      notes: rejectionReason,
+    });
 
-      const response = await fetch("https://magneetarsolutions.com/api/tickets/create_ticket", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${token}`, 
-        },
-        body: JSON.stringify({
-          survey_id: survey_data?.surveyor_id, 
-          type: "correction",
-          notes: rejectionReason,
-        }),
-      });
-
-      if (!response.ok) {
-        throw new Error("Failed to release ticket.");
-      }
-
-      const result = await response.json();
+    if (result.success) {
       alert("Ticket released successfully!");
-
       onUpdateStatus(consumer.consumer_code, "Released", rejectionReason);
       setRejectionReason("");
       setShowReasonBox(false);
-      onClose(); 
-    } catch (error) {
-      console.error(error);
-      alert("Error releasing ticket. Please try again.");
+      onClose();
+    } else {
+      alert(result.error);
     }
   };
 
   const handleApprove = () => {
     onUpdateStatus(consumer.consumer_code, "Approved");
-    onClose(); 
+    onClose();
   };
 
   return (

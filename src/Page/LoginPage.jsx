@@ -1,11 +1,13 @@
-import { useState } from 'react';
+import { useState, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { FaEnvelope, FaLock, FaEye, FaEyeSlash, FaUserShield } from 'react-icons/fa';
 import { MdSupervisorAccount } from 'react-icons/md';
 import logo from '../Assets/Logo/wasa-logo.png';
 import { loginUser } from '../API/index.js';
+import { AuthContext } from '../Context/Context.js'; 
 
 export default function LoginPage() {
+  const { setToken, setUser } = useContext(AuthContext); 
   const [showPassword, setShowPassword] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -18,16 +20,19 @@ export default function LoginPage() {
 
     try {
       const data = await loginUser({ email, password });
-
       console.log("Login response:", data); 
 
       if (data?.success) {
-        // role ensure karein
         const userData = {
           email,
-          role: data.role || 'admin', // API se role lo, warna default admin
-          token: data.token
+          role: data.role || 'admin',
         };
+
+     
+        setUser(userData);
+        setToken(data.token);
+
+        
         localStorage.setItem('user', JSON.stringify(userData));
         localStorage.setItem('authToken', data.token); 
 
@@ -46,6 +51,8 @@ export default function LoginPage() {
       role: role,
     };
     localStorage.setItem('user', JSON.stringify(mockUser));
+    setUser(mockUser);
+    setToken('mock-token'); 
     navigate('/dashboard');
   };
 
