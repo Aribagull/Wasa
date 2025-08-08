@@ -1,5 +1,3 @@
-import { Bell } from "lucide-react";
-import { LuUserRound } from "react-icons/lu";
 
 function WeekSummaryCard({ color, icon, label, count }) {
   return (
@@ -19,25 +17,9 @@ function WeekSummaryCard({ color, icon, label, count }) {
 
 export default function RightSide() {
   return (
-    <div className="w-[350px] bg-[#f5f8fa] p-4 h-screen flex flex-col">
+    <div className="w-[230px] px-4 flex flex-col  ">
      
-      <div className="flex justify-end items-center gap-8 mb-6 mt-5">
-        <Bell className="w-6 h-6 cursor-pointer" />
-        <LuUserRound className="w-6 h-6 pb-[2px] cursor-pointer" />
-      </div>
-
-    
-      <div className="flex items-center space-x-4 mt-8 mb-6">
-        <img
-          src="https://randomuser.me/api/portraits/men/32.jpg"
-          alt="User"
-          className="w-14 h-14 rounded-full object-cover"
-        />
-        <div>
-          <p className="text-gray-800 font-semibold">John D.</p>
-          <p className="text-sm text-gray-500">Joined 2 months ago</p>
-        </div>
-      </div>
+      
 
       <div className="mt-6">
         <h2 className="text-md font-semibold text-gray-800 mb-4">Week Summary</h2>

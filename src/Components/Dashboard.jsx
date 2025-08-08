@@ -1,125 +1,91 @@
-import RightSide from "./RightSide"; 
 import {
-    CheckCircle,
-    ClipboardList,
-    Search,
-    UserCheck,
-    X,
-    UserX,
-} from "lucide-react";
-import React, { useState, useEffect, useRef } from "react";
+  ArrowUpRight,
+  ArrowDownLeft,
+  BadgeCheck,
+  UserCheck,
+  UserX,
+} from 'lucide-react';
+import { FaUsers } from "react-icons/fa";
+import RightSide from './DashboardRightSide';
 
-export default function DashboardPage() {
-    const [showSearch, setShowSearch] = useState(false);
-    const [searchVisible, setSearchVisible] = useState(false);
-    const inputRef = useRef(null);
 
-    useEffect(() => {
-        if (showSearch && inputRef.current) {
-            inputRef.current.focus();
-            setTimeout(() => {
-                setSearchVisible(true);
-            }, 500);
-        } else {
-            setSearchVisible(false);
-        }
-    }, [showSearch]);
+export default function Dashboard() {
+  const stats = [
+    {
+      title: 'Monthly Servey',
+      value: '7432+',
+      icon: <BadgeCheck size={18} className="text-green-500" />,
+      iconBg: 'bg-green-100',
+      trend: 'up',
+      trendValue: '10.2',
+      percent: '+1.01% this Month',
+    },
+    {
+      title: 'Total Users',
+      value: '7864+',
+      icon: <FaUsers size={18} className="text-indigo-500" />,
+      iconBg: 'bg-indigo-100',
+      trend: 'up',
+      trendValue: '10.2',
+      percent: '+1.01% this Month',
+    },
+    {
+      title: 'Total Legal Users',
+      value: '5937+',
+      icon: <UserCheck size={18} className="text-green-400" />,
+      iconBg: 'bg-green-100',
+      trend: 'up',
+      trendValue: '10.2',
+      percent: '+0.10% this Month',
+      },
+    {
+      title: 'Total illegal Users',
+      value: '2471+',
+      icon: <UserX size={18} className="text-red-400" />,
+      iconBg: 'bg-red-100',
+      trend: 'down',
+      trendValue: '10.2',
+      percent: '+1.01% this Month',
+    },
+  ];
 
-    const stats = [
-        {
-            title: "Monthly Survey",
-            count: 24,
-            change: "-9%",
-            icon: <CheckCircle className="w-5 h-5" />,
-            color: "bg-purple-100 text-purple-600",
-            changeColor: "text-red-500",
-        },
-        {
-            title: "Total Users",
-            count: 40,
-            change: "+17%",
-            icon: <ClipboardList className="w-5 h-5" />,
-            color: "bg-green-100 text-green-600",
-            changeColor: "text-green-500",
-        },
-        {
-            title: "Legal Users",
-            count: 28,
-            change: "+23%",
-            icon: <UserCheck className="w-5 h-5" />,
-            color: "bg-yellow-100 text-yellow-600",
-            changeColor: "text-green-500",
-        },
-        {
-            title: "Illegal Users",
-            count: 28,
-            change: "-12%",
-            icon: <UserX className="w-5 h-5" />,
-            color: "bg-blue-100 text-blue-600",
-            changeColor: "text-red-500",
-        },
-    ];
-
-    return (
-        <div className="flex bg-[#fefefe]  w-full min-h-screen">
-         
-            <div className="flex-1 p-6">
-                <div className="flex items-center justify-between">
-                    <h1 className="text-3xl font-bold text-gray-800">Admin Dashboard</h1>
-
-                    <div className="relative flex items-center">
-                        <div
-                            className={`transition-all duration-500 ease-in-out flex items-center rounded-full border
-              ${showSearch ? "w-72 border-gray-300" : "w-10 border-transparent"}`}
-                            style={{ backgroundColor: "white" }}
-                        >
-                            <input
-                                ref={inputRef}
-                                type="text"
-                                placeholder="Search..."
-                                className={`transition-opacity duration-300 ease-in-out pl-4 pr-10 py-2 rounded-full focus:outline-none focus:ring focus:ring-gray-100 focus:border-gray-100 shadow-custom-deep w-full
-                            ${showSearch ? "opacity-100" : "opacity-0"}`}
-                                style={{ backgroundColor: "white" }}
-                            />
-                            <div
-                                className="absolute right-0 flex items-center justify-center rounded-full p-2 cursor-pointer hover:bg-white hover:shadow transition"
-                                onClick={() => {
-                                    setShowSearch(!showSearch);
-                                }}
-                            >
-                                {searchVisible && showSearch ? (
-                                    <X className="w-6 h-6 text-gray-500 transition" />
-                                ) : (
-                                    <Search className="w-6 h-6 text-gray-500 transition" />
-                                )}
-                            </div>
-                        </div>
-                    </div>
+  return (
+    <div className="flex gap-1"> 
+      <div className="flex-1 bg-[#F6F7FF] px-2 py-6">
+         <h2 className="text-md font-semibold text-gray-800 mb-4">Monthly Summary</h2>
+        <div className="bg-white rounded-lg overflow-hidden flex divide-x">
+          {stats.map((item, index) => (
+            <div key={index} className="flex-1 px-4 py-5">
+              <div className="flex items-center justify-between mb-2">
+                <h3 className="text-2xl font-bold text-[#1e1e60]">{item.value}</h3>
+                <div className={`w-9 h-9 rounded-full ${item.iconBg} flex items-center justify-center`}>
+                  {item.icon}
                 </div>
-
-                <p className="text-base text-gray-500 font-semibold mt-2 ml-[2px]">MONTHLY UPDATES</p>
-
-                <div className="flex gap-6 mt-6">
-                    {stats.map((stat, index) => (
-                        <div
-                            key={index}
-                            className="shadow-custom-deep rounded p-6 w-52 bg-white hover:shadow-2xl transition-shadow duration-300"
-                        >
-                            <div
-                                className={`w-12 h-12 flex items-center justify-center rounded-full ${stat.color}`}
-                            >
-                                {stat.icon}
-                            </div>
-                            <p className="text-gray-400 mt-4 ml-2">{stat.title}</p>
-                            <p className="text-3xl font-bold text-gray-800 ml-2 mt-2">{stat.count}</p>
-                            <p className={`mt-1 ml-2 ${stat.changeColor}`}>{stat.change}</p>
-                        </div>
-                    ))}
-                </div>
+              </div>
+              <p className="text-sm text-gray-500">{item.title}</p>
+              <div className="mt-3 flex items-center gap-2 text-xs">
+                {item.trend === 'up' ? (
+                  <ArrowUpRight size={14} className="text-green-500" />
+                ) : (
+                  <ArrowDownLeft size={14} className="text-red-500" />
+                )}
+                <span
+                  className={`${
+                    item.trend === 'up' ? 'text-green-500' : 'text-red-500'
+                  }`}
+                >
+                  {item.trendValue}
+                </span>
+                <span className="text-gray-400">{item.percent}</span>
+              </div>
             </div>
-
-           
-            <RightSide />
+          ))}
         </div>
-    );
+
+     
+      </div>
+<RightSide/>
+    
+    </div>
+  );
 }

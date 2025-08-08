@@ -1,72 +1,164 @@
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Home, Users, BarChart, ClipboardList, Plus, Shield } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { GoHomeFill } from "react-icons/go";
+import { MdSupervisorAccount } from "react-icons/md";
+import { BiSolidDetail } from "react-icons/bi";
+import { CheckCircle } from 'lucide-react';
+import { TiTicket } from "react-icons/ti";
+import { IoIosLogOut } from "react-icons/io";
+import { FaAnglesRight, FaAnglesLeft  } from "react-icons/fa6";
+import { Link, useNavigate, useLocation } from 'react-router-dom';
+import logo from '../Assets/Logo/wasa-logo.png';
 
 export default function Sidebar() {
-  const [activeItem, setActiveItem] = useState('Dashboard');
+  const [collapsed, setCollapsed] = useState(false);
+  const location = useLocation(); 
   const navigate = useNavigate();
+  const [userRole, setUserRole] = useState('');
 
-  const navItems = [
-    { icon: <Home className="w-5 h-5" />, text: 'Dashboard', path: '/' },
-    { icon: <Shield className="w-5 h-5" />, text: 'Admin Panel', path: '/admin' },
-    { icon: <Users className="w-5 h-5" />, text: 'User Data', path: '/userdata' },
-    { icon: <BarChart className="w-5 h-5" />, text: 'Approvals', path: '/approvals' },
-  ];
+  useEffect(() => {
+    const storedUser = JSON.parse(localStorage.getItem('user'));
+    if (storedUser?.role) {
+      setUserRole(storedUser.role.toLowerCase()); 
+    }
+  }, []);
+
+  const handleLogout = () => {
+    localStorage.removeItem('user'); 
+    navigate('/'); 
+  };
 
   return (
-    <div className="w-56 h-screen bg-[#f5f8fa] flex flex-col border-r border-gray-200">
-      <div className="flex-col gap-2 my-10 m-2 ml-5">
-        <div className="bg-blue-500 w-10 rounded-md p-2 text-white font-bold text-xl">
-          W
+    <aside
+      className={`${
+        collapsed ? 'w-[80px]' : 'w-[220px]'
+      } transition-all duration-300 min-h-screen bg-[#FCFBFF] flex flex-col justify-between`}
+    >
+      <div>
+        <div className="flex justify-end p-2">
+          <button
+            className="p-2 hover:rounded-md hover:bg-blue-100 transition"
+            onClick={() => setCollapsed(!collapsed)}
+          >
+            {collapsed ? (
+              <FaAnglesRight size={16} className="text-blue-500" />
+            ) : (
+              <FaAnglesLeft  size={16} className="text-blue-500" />
+            )}
+          </button>
         </div>
-        <span className="font-semibold text-md">Wasa</span>
+
+        <div className="p-4 flex items-center gap-5">
+          <img
+            src={logo}
+            alt="Logo"
+            className={`transition-all duration-300 ${collapsed ? 'w-12 h-12' : 'w-16 h-16'}`}
+          />
+          <div
+            className={`overflow-hidden transition-all duration-300 ${
+              collapsed ? 'max-w-0 opacity-0' : 'max-w-[200px] opacity-100'
+            }`}
+          >
+            <div className="font-serif text-center">
+              <h3>Wasa</h3>
+              <p className="text-sm">Rawalpindi</p>
+            </div>
+          </div>
+        </div>
+
+        <div className="px-2 mt-4 space-y-4 text-sm">
+          <MenuItem
+            icon={<GoHomeFill size={18} />}
+            label="Dashboard"
+            to="/dashboard"
+            collapsed={collapsed}
+            active={location.pathname === '/dashboard'}
+          />
+
+       
+          {userRole === 'admin' && (
+            <MenuItem
+              icon={<MdSupervisorAccount size={18} />}
+              label="Supervisor Management"
+              to="/dashboard/supervisor"
+              collapsed={collapsed}
+              active={location.pathname === '/dashboard/supervisor'}
+            />
+          )}
+
+          
+          {userRole === 'supervisor' && (
+            <MenuItem
+              icon={<MdSupervisorAccount size={18} />}
+              label="Surveyor Management"
+              to="/dashboard/surveyor-management"
+              collapsed={collapsed}
+              active={location.pathname === '/dashboard/surveyor-management'}
+            />
+          )}
+
+          <MenuItem
+            icon={<BiSolidDetail size={18} />}
+            label="Consumer Details"
+            to="/dashboard/consumer-details"
+            collapsed={collapsed}
+            active={location.pathname === '/dashboard/consumer-details'}
+          />
+
+          <MenuItem
+            icon={<CheckCircle size={18} />}
+            label="Survey Details"
+            to="/dashboard/survey-details"
+            collapsed={collapsed}
+            active={location.pathname === '/dashboard/survey-details'}
+          />
+
+          <MenuItem
+            icon={<TiTicket size={18} />}
+            label="Ticket Status"
+            to="/dashboard/ticket-status"
+            collapsed={collapsed}
+            active={location.pathname === '/dashboard/ticket-status'}
+          />
+        </div>
       </div>
 
-      <nav className="flex flex-col gap-4 text-gray-400">
-        {navItems.map((item) => (
-          <SidebarItem
-            key={item.text}
-            icon={item.icon}
-            text={item.text}
-            active={activeItem === item.text}
-            onClick={() => {
-              setActiveItem(item.text);
-              navigate(item.path);
-            }}
-          />
-        ))}
-      </nav>
-
-      <div className="mt-auto mx-6 mb-5">
-        <button className="w-full bg-blue-50 text-sm text-start text-black font-semibold py-3 px-4 rounded-2xl flex items-center justify-between">
-          Create New Admin
-          <div className="bg-blue-500 text-white rounded-full w-6 h-6 flex items-center justify-center">
-            <Plus size={16} />
+      <div className="p-4">
+        <button
+          onClick={handleLogout} 
+          className="w-full flex items-center justify-center gap-6 py-2 bg-blue-600 text-white hover:text-gray-200 hover:bg-blue-800 rounded-lg text-sm font-medium shadow transition"
+        >
+          <div
+            className={`overflow-hidden transition-all duration-300 ${
+              collapsed ? 'max-w-0 opacity-0' : 'max-w-[100px] opacity-100'
+            }`}
+          >
+            <span>Logout</span>
           </div>
+          <IoIosLogOut size={18} />
         </button>
       </div>
-    </div>
+    </aside>
   );
 }
 
-
-function SidebarItem({ icon, text, active, onClick }) {
+function MenuItem({ icon, label, to, active, collapsed }) {
   return (
-    <div
-      onClick={onClick}
-      className={`flex items-center gap-3 text-sm py-3 pl-0 pr-4 cursor-pointer
-        transition-all duration-200 ease-in-out
-        ${active
-          ? 'text-blue-600 font-semibold border-l-4 border-blue-600'
-          : 'text-gray-400 border-l-4 border-transparent hover:border-blue-300 hover:text-gray-500'
-        }
-      `}
+    <Link
+      to={to}
+      className={`flex items-center p-3 rounded cursor-pointer transition-all
+        ${active ? 'text-blue-600 border-r-4 border-blue-600 bg-[#eff3ff]' : 'hover:text-blue-600'}
+        ${collapsed ? 'justify-center' : 'gap-3'}`}
     >
-      <div className="ml-4 flex items-center gap-3">
-        {icon}
-        <span>{text}</span>
+      {icon}
+      <div className="overflow-hidden">
+        <span
+          className={`inline-block whitespace-nowrap transition-all duration-300 ${
+            collapsed ? 'opacity-0 max-w-0' : 'opacity-100 max-w-[200px] ml-2'
+          }`}
+        >
+          {label}
+        </span>
       </div>
-    </div>
+    </Link>
   );
 }
-
