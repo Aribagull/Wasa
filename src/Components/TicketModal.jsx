@@ -1,27 +1,73 @@
-import { useState } from "react";
-import { FaUserCircle } from "react-icons/fa";
+import { useState, useEffect } from "react";
+import TicketUserInfo from "./TicketUserInfo";
+import { approveSurvey, closeTicket } from "../API/index.js";
+import ChatBox from "./ChatBox.jsx";
 
-export default function TicketModal({ ticket, onClose, onUpdate }) {
-  const oldMessages = [
-    { role: "Admin", text: "Hello" },
-    { role: "Surveyor", text: "Hi" },
-    { role: "Surveyor", text: "Thank you" },
-  ];
-
+export default function TicketModal({ ticket, onClose, onUpdate, allTickets = [] }) {
   const [chatMessages, setChatMessages] = useState([]);
   const [input, setInput] = useState("");
   const [showReasonBox, setShowReasonBox] = useState(false);
+  const [showOverlay, setShowOverlay] = useState(false);
   const [rejectionReason, setRejectionReason] = useState("");
+  const [filter, setFilter] = useState("chat");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+  const authToken = localStorage.getItem("token");
+
+  
+  useEffect(() => {
+    if (!showOverlay) {
+      setFilter("chat");
+    }
+  }, [showOverlay]);
 
   const handleSend = () => {
     if (input.trim() === "") return;
-    const newMessage = { role: "Admin", text: input };
+    const newMessage = { role: "Admin", text: input, type: "new" };
     setChatMessages((prev) => [...prev, newMessage]);
     setInput("");
   };
 
-  const handleApprove = () => {
-    onUpdate(ticket.id, "Approved");
+  const handleApprove = async () => {
+    setLoading(true);
+    setError("");
+
+    try {
+      const surveyId = ticket.survey_id;
+      if (!surveyId) throw new Error("Survey ID not found");
+
+      const surveyTickets = allTickets.filter((t) => t.survey_id === surveyId);
+      console.log("Survey Tickets before closing:", surveyTickets);
+
+      const results = await Promise.all(
+        surveyTickets.map((t) => closeTicket(t.ticket_id))
+      );
+      console.log("Close ticket results:", results);
+
+      const failed = results.find((r) => !r.success);
+      if (failed) {
+        setError(failed.error || "Failed to close some ticket.");
+        return;
+      }
+
+      surveyTickets.forEach((t) => {
+        onUpdate(t.ticket_id, "Approved");
+      });
+
+      const approveResult = await approveSurvey(surveyId);
+      console.log("Approve response:", approveResult);
+
+      if (!approveResult.success) {
+        setError(approveResult.error || "Failed to approve survey.");
+        return;
+      }
+
+      onClose();
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleReject = () => {
@@ -30,37 +76,70 @@ export default function TicketModal({ ticket, onClose, onUpdate }) {
       return;
     }
     if (rejectionReason.trim() === "") return;
-    onUpdate(ticket.id, "Rejected", rejectionReason);
+    onUpdate(ticket.survey_id, "Rejected", rejectionReason);
   };
 
   return (
-    <div className="flex flex-col">
-      <h2 className="text-sm font-semibold pb-2 border-b">Ticket Details</h2>
+    <div className="flex flex-col h-full">
+    
+      {showOverlay && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 ">
+          <div className="bg-white w-[81%] h-[90vh] rounded-lg shadow-lg flex flex-col p-4 ">
+            <div className="flex justify-between items-center border-b pb-2 mb-2">
+              <h2 className="text-blue-600 font-semibold text-sm">
+                {filter === "new"
+                  ? "New Data"
+                  : filter === "old"
+                  ? "Old Data"
+                  : "Split View"}
+              </h2>
+              <button
+                onClick={() => setShowOverlay(false)} 
+                className="px-3 py-1 text-xs bg-gray-200 text-gray-700 rounded hover:bg-gray-300"
+              >
+                ← Back
+              </button>
+            </div>
 
-      <div className="mb-2 bg-white mt-2 p-4">
+            <div className="flex-1 overflow-auto">
+              <TicketUserInfo ticket={ticket} filter={filter} />
+            </div>
+          </div>
+        </div>
+      )}
+
+      <div className="mb-2 bg-white p-4">
         <div className="flex items-center justify-between text-sm text-gray-700 mb-2">
           <div>
-            <span className="font-semibold text-base text-[#1e1e60]">
-              {ticket.issue || "N/A"}
+            <span className="font-semibold text-sm text-red-600 uppercase">
+              {ticket.issue || ticket.notes || "N/A"}
             </span>
           </div>
           <div>
             Ticket ID:
-            <span className="font-semibold ml-1">{ticket.id || "N/A"}</span>
+            <span className="font-semibold ml-1">
+              {ticket.ticket_id || "N/A"}
+            </span>
           </div>
         </div>
 
         <div className="text-sm text-gray-700 mb-2">
           Name:
           <span className="font-semibold ml-1">
-            {ticket.consumer?.full_name || "N/A"}
+            {ticket.temp_consumer?.full_name
+              ? ticket.temp_consumer.full_name.charAt(0).toUpperCase() +
+                ticket.temp_consumer.full_name.slice(1).toLowerCase()
+              : "N/A"}
           </span>
         </div>
 
         <div className="text-sm text-gray-700 mb-2">
           Category:
           <span className="font-semibold ml-1">
-            {ticket.premiseDetails?.category || "N/A"}
+            {ticket.temp_property?.category
+              ? ticket.temp_property.category.charAt(0).toUpperCase() +
+                ticket.temp_property.category.slice(1).toLowerCase()
+              : "N/A"}
           </span>
         </div>
 
@@ -68,16 +147,26 @@ export default function TicketModal({ ticket, onClose, onUpdate }) {
           <div>
             Status:
             <span className="font-semibold ml-1">
-              {ticket.premiseDetails?.status || "N/A"}
+              {ticket.temp_property?.status
+                ? ticket.temp_property.status.charAt(0).toUpperCase() +
+                  ticket.temp_property.status.slice(1).toLowerCase()
+                : "N/A"}
             </span>
           </div>
           <button
             onClick={handleApprove}
-            className="text-xs bg-black text-white px-4 py-2 rounded hover:bg-green-600"
+            disabled={loading}
+            className={`text-xs px-4 py-2 rounded ${
+              loading
+                ? "bg-gray-400 cursor-not-allowed"
+                : "bg-blue-600 hover:bg-transparent hover:text-black hover:border text-white"
+            }`}
           >
-            Approve
+            {loading ? "Approving..." : "Approve"}
           </button>
         </div>
+
+        {error && <p className="text-red-500 text-xs">{error}</p>}
 
         {showReasonBox && (
           <div className="mb-3">
@@ -91,108 +180,30 @@ export default function TicketModal({ ticket, onClose, onUpdate }) {
         )}
       </div>
 
-      <h3 className="text-sm font-semibold text-blue-600 pb-1">
-        Chat Conversation With Surveyor
-      </h3>
-
-      <div className="flex-1 mt-2 flex gap-4">
-
-        <div className="w-1/2 bg-white p-4 h-[300px] overflow-y-auto custom-scrollbar">
-          <h4 className="text-xs font-semibold mb-3 text-gray-600 border-b pb-1">
-            Old Messages
-          </h4>
-          <div className="space-y-2 text-xs text-gray-700">
-            {oldMessages.map((msg, index) => {
-              const isAdmin = msg.role === "Admin";
-              return (
-                <div
-                  key={index}
-                  className={`flex items-start gap-2 ${isAdmin ? "justify-end" : "justify-start"
-                    }`}
-                >
-                  {!isAdmin && (
-                    <FaUserCircle size={20} className="text-gray-500" />
-                  )}
-                  <div
-                    className={`px-4 py-2 rounded-lg text-xs max-w-xs ${isAdmin
-                        ? "bg-blue-500 text-white"
-                        : "bg-gray-200 text-gray-800"
-                      }`}
-                  >
-                    {msg.text}
-                  </div>
-                  {isAdmin && (
-                    <FaUserCircle size={20} className="text-blue-500" />
-                  )}
-                </div>
-              );
-            })}
-          </div>
-        </div>
-
-
-        <div className="w-1/2 flex bg-white flex-col justify-between h-[300px] custom-scrollbar">
-          <div className="flex-1 p-4 space-y-2 overflow-y-auto">
-            {chatMessages.map((msg, index) => {
-              const isAdmin = msg.role === "Admin";
-              return (
-                <div
-                  key={index}
-                  className={`flex items-start gap-2 ${isAdmin ? "justify-end" : "justify-start"
-                    }`}
-                >
-                  {!isAdmin && (
-                    <FaUserCircle size={20} className="text-gray-500" />
-                  )}
-                  <div
-                    className={`px-4 py-2 rounded-lg text-xs max-w-xs ${isAdmin
-                        ? "bg-blue-600 text-white"
-                        : "bg-white text-gray-800"
-                      }`}
-                  >
-                    {msg.text}
-                  </div>
-                  {isAdmin && (
-                    <FaUserCircle size={20} className="text-blue-500" />
-                  )}
-                </div>
-              );
-            })}
-          </div>
-
-          <div className="p-3 border-t">
-            <div className="flex items-center">
-              <input
-                type="text"
-                placeholder="Type a message..."
-                value={input}
-                onChange={(e) => setInput(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") {
-                    handleSend();
-                  }
-                }}
-                className="border rounded px-3 py-2 text-sm w-full mr-2 focus:outline-none focus:ring-1 focus:ring-blue-500"
-              />
-              <button
-                onClick={handleSend}
-                className="bg-blue-500 text-white px-3 py-2 rounded hover:bg-blue-600"
-              >
-                ➤
-              </button>
-            </div>
-
-            <div className="mt-2 text-right">
-              <button
-                onClick={onClose}
-                className="text-sm text-gray-500 hover:text-red-600"
-              >
-                Close
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
+    
+      {filter === "chat" && (
+        <>
+          <h3 className="text-sm font-semibold text-blue-600 pb-1">
+            Chat Conversation With Surveyor
+          </h3>
+          <ChatBox
+            ticketId={ticket.ticket_id}
+            surveyId={ticket.survey_id}
+            token={authToken}
+            chatMessages={chatMessages}
+            setChatMessages={setChatMessages}
+            input={input}
+            setInput={setInput}
+            filter={filter}
+            setFilter={(val) => {
+              setFilter(val);
+              if (val !== "chat") setShowOverlay(true); 
+            }}
+            issue={ticket.issue || ticket.notes}
+            onClose={onClose}
+          />
+        </>
+      )}
     </div>
   );
 }

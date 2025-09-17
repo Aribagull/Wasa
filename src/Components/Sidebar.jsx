@@ -16,11 +16,12 @@ export default function Sidebar() {
   const [userRole, setUserRole] = useState('');
 
   useEffect(() => {
-    const storedUser = JSON.parse(localStorage.getItem('user'));
-    if (storedUser?.role) {
-      setUserRole(storedUser.role.toLowerCase()); 
-    }
-  }, []);
+  const storedUser = JSON.parse(localStorage.getItem('user'));
+  if (storedUser?.role) {
+    setUserRole(storedUser.role); 
+  }
+}, []);
+
 
   const handleLogout = () => {
     localStorage.removeItem('user'); 
@@ -75,18 +76,19 @@ export default function Sidebar() {
           />
 
        
-          {userRole === 'admin' && (
-            <MenuItem
-              icon={<MdSupervisorAccount size={18} />}
-              label="Supervisor Management"
-              to="/dashboard/supervisor"
-              collapsed={collapsed}
-              active={location.pathname === '/dashboard/supervisor'}
-            />
-          )}
+          {(userRole === 'admin' || userRole === 'Super Admin') && (
+  <MenuItem
+    icon={<MdSupervisorAccount size={18} />}
+    label="Supervisor Management"
+    to="/dashboard/supervisor"
+    collapsed={collapsed}
+    active={location.pathname === '/dashboard/supervisor'}
+  />
+)}
+
 
           
-          {userRole === 'supervisor' && (
+          {userRole === 'Supervisor' && (
             <MenuItem
               icon={<MdSupervisorAccount size={18} />}
               label="Surveyor Management"

@@ -2,6 +2,7 @@
   "name": "react-tailwind-css-starter-pack",
   "version": "0.1.0",
   "private": true,
+  "proxy": "https://magneetarsolutions.com",
   "dependencies": {
     "@heroicons/react": "^2.2.0",
     "axios": "^1.11.0",

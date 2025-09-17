@@ -9,7 +9,6 @@ export default function Navbar() {
 
   useEffect(() => {
     const storedUser = JSON.parse(localStorage.getItem("user"));
-    console.log("Navbar user data:", storedUser);
     setUser(storedUser);
   }, [location]);
 

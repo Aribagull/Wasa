@@ -2,10 +2,10 @@
 import axios from "axios";
 
 const axiosInstance = axios.create({
-  baseURL: "https://magneetarsolutions.com/api",
-  headers: {
-    "Content-Type": "application/json",
-  },
+  baseURL: "/api",
+  // headers: {
+  //   "Content-Type": "application/json",
+  // },
 });
 
 
@@ -29,6 +29,7 @@ axiosInstance.interceptors.response.use(
     if (error.response?.status === 401) {
       console.error("Unauthorized, logging out...");
       localStorage.removeItem("token");
+      localStorage.removeItem("user_id");
       localStorage.removeItem("user");
       window.location.href = "/";
     }

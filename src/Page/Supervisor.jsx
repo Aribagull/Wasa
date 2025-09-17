@@ -4,75 +4,48 @@ import CreateSupervisorModal from "./CreateSupervisorModal";
 import { FiSearch, FiEdit, FiTrash2, FiPlusCircle } from "react-icons/fi";
 import { FiChevronLeft, FiChevronRight } from "react-icons/fi";
 import { FaUsersCog } from "react-icons/fa";
-
-const supervisors = [
-  {
-    name: "Jasin Saim",
-    email: "amina@domain.com",
-    phone: "0300-1234567",
-    type: "Supervisor",
-    joined: "2023-05-10",
-    status: "Active",
-  },
-  {
-    name: "Zain Raza",
-    email: "zain@domain.com",
-    phone: "0311-2223344",
-    type: "Supervisor",
-    joined: "2023-06-15",
-    status: "Inactive",
-  },
-  {
-    name: "Nadia Khan",
-    email: "nadia@domain.com",
-    phone: "0322-5566778",
-    type: "Supervisor",
-    joined: "2024-01-20",
-    status: "Active",
-  },
-  {
-    name: "Ali Khan",
-    email: "ali@domain.com",
-    phone: "0345-1122334",
-    type: "Supervisor",
-    joined: "2024-04-01",
-    status: "Active",
-  },
-];
-
-const surveyors = [
-  {
-    id: "SR101",
-    name: "Charlie Brown",
-    email: "charlie@surveywise.com",
-    phone: "0301-8888888",
-    type: "Surveyor",
-    joined: "2024-02-12",
-    status: "Active",
-  },
-  {
-    id: "SR102",
-    name: "Diana Prince",
-    email: "diana@surveywise.com",
-    phone: "0309-9999999",
-    type: "Surveyor",
-    joined: "2024-03-05",
-    status: "Inactive",
-  },
-];
+import { getSupervisors, getSurveyors } from "../API/index.js";
+import CreateUserModal from "./CreateSurveyorForm.jsx";
 
 export default function Supervisor() {
   const [activeTab, setActiveTab] = useState("Supervisors");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
+  const [supervisors, setSupervisors] = useState([]);
+  const [surveyors, setSurveyors] = useState([]);
+  const [loading, setLoading] = useState(false);
+
   const itemsPerPage = 3;
+
+
+  useEffect(() => {
+    const fetchData = async () => {
+      setLoading(true);
+      try {
+        if (activeTab === "Supervisors") {
+          const data = await getSupervisors();
+          setSupervisors(data);
+        } else {
+          const data = await getSurveyors();
+          setSurveyors(data);
+        }
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, [activeTab]);
 
   const filteredData = (activeTab === "Supervisors" ? supervisors : surveyors).filter(
     (item) =>
-      item.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      item.full_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       item.email.toLowerCase().includes(searchTerm.toLowerCase())
   );
+
 
   const totalPages = Math.ceil(filteredData.length / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
@@ -100,7 +73,6 @@ export default function Supervisor() {
         <FaUsersCog className="text-2xl mb-3 text-blue-600" />
         <h1 className="text-base font-semibold mb-3"> Supervisor & Surveyor Management</h1>
       </div>
-     
 
       <div className="grid grid-cols-1 w-[50%] sm:grid-cols-2 gap-4 mb-4">
         <div className="bg-white rounded-lg p-4">
@@ -135,11 +107,10 @@ export default function Supervisor() {
           <button
             key={tab}
             onClick={() => setActiveTab(tab)}
-            className={`px-4 py-2 text-sm font-medium ${
-              activeTab === tab
+            className={`px-4 py-2 text-sm font-medium ${activeTab === tab
                 ? "text-blue-600 border-b-2 border-blue-600"
                 : "text-gray-500 hover:text-blue-500"
-            }`}
+              }`}
           >
             {tab}
           </button>
@@ -154,7 +125,7 @@ export default function Supervisor() {
           onClick={() => setIsModalOpen(true)}
           className="bg-blue-600 hover:bg-blue-700 text-white px-2 py-2 rounded text-xs flex items-center gap-2"
         >
-          <span className="text-xs"><FiPlusCircle/></span>{" "}
+          <span className="text-xs"><FiPlusCircle /></span>{" "}
           {activeTab === "Supervisors" ? "Create Supervisor" : "Create Surveyor"}
         </button>
       </div>
@@ -174,90 +145,99 @@ export default function Supervisor() {
         </div>
       </div>
 
-      <div className="bg-white overflow-x-auto">
-        <table className="min-w-full">
-          <thead className="text-left text-sm font-medium text-gray-600">
-            <tr>
-              <th className="py-3 px-4">Name</th>
-              <th className="py-3 px-4">Email</th>
-              <th className="py-3 px-4">Phone</th>
-              <th className="py-3 px-4">Type</th>
-              <th className="py-3 px-4">Joined Date</th>
-              <th className="py-3 px-4">Status</th>
-              <th className="py-3 px-4 text-right">Actions</th>
-            </tr>
-          </thead>
-          <tbody className="text-sm text-gray-700">
-            {paginatedData.map((item, index) => (
-              <tr key={index} className="border-t">
-                <td className="px-4 py-3">{item.name}</td>
-                <td className="px-4 py-3">{item.email}</td>
-                <td className="px-4 py-3">{item.phone}</td>
-                <td className="px-4 py-3">{item.type}</td>
-                <td className="px-4 py-3">{item.joined}</td>
-                <td className="px-4 py-3">
-                  <span
-                    className={`px-2 py-1 rounded-full text-xs font-medium ${
-                      item.status === "Active"
+      {loading ? (
+        <p className="text-center py-6 text-gray-500"></p>
+      ) : (
+        <div className="bg-white overflow-x-auto">
+          <table className="min-w-full">
+            <thead className="text-left text-sm font-medium text-gray-600">
+              <tr>
+                <th className="py-3 px-4">Name</th>
+                <th className="py-3 px-4">Email</th>
+                <th className="py-3 px-4">Phone</th>
+                <th className="py-3 px-4">Type</th>
+                <th className="py-3 px-4">Joined Date</th>
+                <th className="py-3 px-4">Status</th>
+                <th className="py-3 px-4 text-right">Actions</th>
+              </tr>
+            </thead>
+            <tbody className="text-sm text-gray-700">
+              {paginatedData.map((item, index) => (
+                <tr key={index} className="border-t">
+                  <td className="px-4 py-3">{item.full_name}</td>
+                  <td className="px-4 py-3">{item.email}</td>
+                  <td className="px-4 py-3">{item.phone}</td>
+                  <td className="px-4 py-3">{item.role_id}</td>
+                  <td className="px-4 py-3">{item.created_at?.slice(0, 10)}</td>
+                  <td className="px-4 py-3">
+                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${item.status === "Active"
                         ? "bg-green-100 text-green-600"
                         : "bg-red-100 text-red-600"
-                    }`}
-                  >
-                    {item.status}
-                  </span>
-                </td>
-                <td className="px-4 py-3 text-right space-x-2">
-                  <button
-                    onClick={() => handleEdit(item)}
-                    className="text-blue-600 hover:text-blue-800"
-                    title="Edit"
-                  >
-                    <FiEdit />
-                  </button>
-                  <button
-                    onClick={() => handleDelete(item)}
-                    className="text-red-600 hover:text-red-800"
-                    title="Delete"
-                  >
-                    <FiTrash2 />
-                  </button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+                      }`}>
+                      {item.status}
+                    </span>
+                  </td>
+
+                  <td className="px-4 py-3 text-right space-x-2">
+                    <button
+                      onClick={() => handleEdit(item)}
+                      className="text-blue-600 hover:text-blue-800"
+                      title="Edit"
+                    >
+                      <FiEdit />
+                    </button>
+                    <button
+                      onClick={() => handleDelete(item)}
+                      className="text-red-600 hover:text-red-800"
+                      title="Delete"
+                    >
+                      <FiTrash2 />
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
 
       <div className="flex justify-end mt-4 gap-4">
-  <button
-    onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
-    disabled={currentPage === 1}
-    className={`p-2 rounded-full border transition ${
-      currentPage === 1
-        ? "text-gray-400 border-gray-200"
-        : "text-blue-600 border-blue-300 hover:bg-blue-100"
-    }`}
-  >
-    <FiChevronLeft className="w-3 h-3" />
-  </button>
-  <button
-    onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
-    disabled={currentPage === totalPages}
-    className={`p-2 rounded-full border transition ${
-      currentPage === totalPages
-        ? "text-gray-400 border-gray-200"
-        : "text-blue-600 border-blue-300 hover:bg-blue-100"
-    }`}
-  >
-    <FiChevronRight className="w-3 h-3" />
-  </button>
-</div>
+        <button
+          onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+          disabled={currentPage === 1}
+          className={`p-2 rounded-full border transition ${currentPage === 1
+              ? "text-gray-400 border-gray-200"
+              : "text-blue-600 border-blue-300 hover:bg-blue-100"
+            }`}
+        >
+          <FiChevronLeft className="w-3 h-3" />
+        </button>
+        <button
+          onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
+          disabled={currentPage === totalPages}
+          className={`p-2 rounded-full border transition ${currentPage === totalPages
+              ? "text-gray-400 border-gray-200"
+              : "text-blue-600 border-blue-300 hover:bg-blue-100"
+            }`}
+        >
+          <FiChevronRight className="w-3 h-3" />
+        </button>
+      </div>
 
-      <CreateSupervisorModal
-        isModalOpen={isModalOpen}
-        setIsModalOpen={setIsModalOpen}
-        activeTab={activeTab}
-      />
+      {activeTab === "Supervisors" ? (
+  <CreateSupervisorModal
+    isModalOpen={isModalOpen}
+    setIsModalOpen={setIsModalOpen}
+    setUsers={setSupervisors} 
+  />
+) : (
+  <CreateUserModal
+    isModalOpen={isModalOpen}
+    setIsModalOpen={setIsModalOpen}
+    setUsers={setSurveyors} 
+    role="surveyor"
+  />
+)}
     </div>
   );
 }

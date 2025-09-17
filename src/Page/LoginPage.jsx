@@ -20,24 +20,34 @@ export default function LoginPage() {
 
     try {
       const data = await loginUser({ email, password });
-      console.log("Login response:", data); 
 
       if (data?.success) {
-        const userData = {
-          email,
-          role: data.role || 'admin',
-        };
+  const userData = {
+    email: data.user.email,
+    full_name: data.user.full_name,
+    phone: data.user.phone,
+    role: data.user.role.role_name, 
+    role_id: data.user.role.role_id,
+    user_id: data.user.user_id,
+    status: data.user.status,
+  };
 
-     
-        setUser(userData);
-        setToken(data.token);
+  
+  setUser(userData);
+  setToken(data.token);
+  localStorage.setItem("user", JSON.stringify(userData));
+  localStorage.setItem("authToken", data.token);
 
-        
-        localStorage.setItem('user', JSON.stringify(userData));
-        localStorage.setItem('authToken', data.token); 
-
-        navigate('/dashboard');
-      } else {
+ 
+  if (userData.role.toLowerCase() === "super admin") {
+    navigate("/dashboard"); 
+  } else if (userData.role.toLowerCase() === "supervisor") {
+    navigate("/dashboard"); 
+  } else {
+    navigate("/dashboard"); 
+  }
+}
+else {
         setError(data?.message || 'Invalid credentials');
       }
     } catch (err) {
@@ -46,15 +56,22 @@ export default function LoginPage() {
   };
 
   const handleRoleLogin = (role) => {
-    const mockUser = {
-      email: role === 'admin' ? 'admin@wasa.com' : 'supervisor@wasa.com',
-      role: role,
-    };
-    localStorage.setItem('user', JSON.stringify(mockUser));
-    setUser(mockUser);
-    setToken('mock-token'); 
-    navigate('/dashboard');
+  const mockUser = {
+    email: role === 'admin' ? 'admin@wasa.com' : 'supervisor@wasa.com',
+    role: role,
   };
+  localStorage.setItem('user', JSON.stringify(mockUser));
+  setUser(mockUser);
+  setToken('mock-token'); 
+
+ if (mockUser.role === "Super Admin") {
+  navigate("/dashboard"); 
+} else if (mockUser.role === "Supervisor") {
+  navigate("/dashboard"); 
+}
+
+};
+
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-blue-100 to-white flex items-center justify-center">

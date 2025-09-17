@@ -17,9 +17,15 @@ export function AuthProvider({ children }) {
   }, []);
 
   const login = (userData, authToken) => {
-    setUser(userData);
+    const formattedUser = {
+      ...userData,
+      role: userData.role?.role_name || userData.role,
+    };
+
+    setUser(formattedUser);
     setToken(authToken);
-    localStorage.setItem("user", JSON.stringify(userData));
+
+    localStorage.setItem("user", JSON.stringify(formattedUser));
     localStorage.setItem("token", authToken);
   };
 

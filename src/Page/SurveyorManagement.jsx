@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   FiSearch,
   FiPlusCircle,
@@ -8,69 +8,41 @@ import {
   FiTrash2,
 } from "react-icons/fi";
 import { FaUsersCog } from "react-icons/fa";
+import { getSurveyors } from "../API/index.js";
+import CreateUserModal from "./CreateSurveyorForm.jsx";
 
-
-const surveyors = [
-  {
-    name: "Jacob Smith",
-    email: "jacob.smith@example.com",
-    phone: "0300-1234567",
-    type: "Survoyer",
-    status: "Active",
-    date: "2023-05-10",
-  },
-  {
-    name: "Emily Johnson",
-    email: "emily.johnson@example.com",
-    phone: "0311-9876543",
-    type: "Survoyer",
-    status: "Inactive",
-    date: "2023-05-10",
-  },
-  {
-    name: "Michael Williams",
-    email: "michael.williams@example.com",
-    phone: "0322-4567890",
-    type: "Survoyer",
-    status: "Active",
-    date: "2023-05-10",
-  },
-  {
-    name: "Sarah Davis",
-    email: "sarah.davis@example.com",
-    phone: "0345-1122334",
-    type: "Survoyer",
-    status: "Active",
-    date: "2023-05-10",
-  },
-  {
-    name: "Daniel Lee",
-    email: "daniel.lee@example.com",
-    phone: "0303-5544332",
-    type: "Survoyer",
-    status: "Inactive",
-    date: "2023-05-10",
-  },
-  {
-    name: "Linda Scott",
-    email: "linda.scott@example.com",
-    phone: "0333-6655443",
-    type: "Survoyer",
-    status: "Active",
-    date: "2023-05-10",
-  },
-];
 
 export default function SurveyorManagement() {
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
-  const itemsPerPage = 4;
+  const [surveyors, setSurveyors] = useState([]); 
+  const [loading, setLoading] = useState(true);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const itemsPerPage = 8;
+
+  
+  useEffect(() => {
+    const fetchSurveyors = async () => {
+      try {
+        setLoading(true);
+        const data = await getSurveyors();
+        setSurveyors(data); 
+      } catch (error) {
+        console.error("Error fetching surveyors:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchSurveyors();
+  }, []);
+
 
   const filteredSurveyors = surveyors.filter(
-    (s) =>
-      s.name.toLowerCase().includes(search.toLowerCase()) ||
-      s.email.toLowerCase().includes(search.toLowerCase())
-  );
+  (s) =>
+    (s.name?.toLowerCase() || "").includes(search.toLowerCase()) ||
+    (s.email?.toLowerCase() || "").includes(search.toLowerCase())
+);
+
 
   const totalPages = Math.ceil(filteredSurveyors.length / itemsPerPage);
   const startIndex = (page - 1) * itemsPerPage;
@@ -87,51 +59,29 @@ export default function SurveyorManagement() {
     if (page < totalPages) setPage(page + 1);
   };
 
+  if (loading) {
+    return <p className="text-center py-6">Loading surveyors...</p>;
+  }
+
   return (
     <div className="px-3 py-6">
       <h1 className="text-base font-semibold mb-3 flex items-center gap-2">
-  <FaUsersCog className="text-xl" />
-  Supervisor Management
-</h1>
-      <div className="p-6 w-full flex justify-between items-center bg-white rounded-lg mb-6">
- 
-  <div className="flex items-center">
-    <img
-      src="https://randomuser.me/api/portraits/men/75.jpg"
-      alt="Profile"
-      className="w-16 h-16 rounded-full mr-4"
-    />
-    <div>
-      <h2 className="text-lg font-semibold text-gray-800">John Doe</h2>
-      <p className="text-sm text-gray-500">john.doe@example.com</p>
-    </div>
-  </div>
+        <FaUsersCog className="text-xl" />
+        Supervisor Management
+      </h1>
 
-  
-  <div className="flex flex-col gap-x-6 gap-y-2 text-sm text-gray-700">
     
-    <div>
-      <span className="font-semibold">Type:</span> <span className="text-gray-600 ml-4">Supervisor</span>
-    </div>
-    <div>
-      <span className="font-semibold">Status:</span>
-      <span className="ml-4 inline-block px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-600">
-        Active
-      </span>
-    </div>
-  </div>
-</div>
-
-
       <div className="flex items-center justify-between mb-2">
-        <h2 className="text-lg font-semibold">All Surveyors
-        </h2>
-        <button className="bg-blue-600 hover:bg-blue-700 text-white px-2 py-2 rounded text-xs flex items-center gap-2">
+        <h2 className="text-lg font-semibold">All Surveyors</h2>
+        <button className="bg-blue-600 hover:bg-blue-700 text-white px-2 py-2 rounded text-xs flex items-center gap-2"
+        onClick={() => setIsModalOpen(true)}
+        >
           <FiPlusCircle className="text-xs" />
           Create Surveyor
         </button>
       </div>
 
+      
       <div className="relative my-4">
         <input
           type="text"
@@ -140,7 +90,7 @@ export default function SurveyorManagement() {
           value={search}
           onChange={(e) => {
             setSearch(e.target.value);
-            setPage(1); 
+            setPage(1);
           }}
         />
         <div className="absolute top-0 right-0 h-full">
@@ -150,6 +100,7 @@ export default function SurveyorManagement() {
         </div>
       </div>
 
+     
       <div className="bg-white overflow-x-auto">
         <table className="min-w-full">
           <thead className="text-left text-sm font-medium text-gray-600">
@@ -166,23 +117,22 @@ export default function SurveyorManagement() {
           <tbody className="text-sm text-gray-700">
             {currentSurveyors.map((item, index) => (
               <tr key={index} className="border-t">
-                <td className="px-4 py-3">{item.name}</td>
+                <td className="px-4 py-3">{item.full_name}</td>
                 <td className="px-4 py-3">{item.email}</td>
                 <td className="px-4 py-3">{item.phone}</td>
                 <td className="px-4 py-3">{item.type}</td>
-                 <td className="px-4 py-3">{item.date}</td>
+                <td className="px-4 py-3">{item.created_at}</td>
                 <td className="px-4 py-3">
                   <span
                     className={`px-2 py-1 rounded-full text-xs font-medium ${
                       item.status === "Active"
-                        ? "bg-green-100 text-green-600"
-                        : "bg-red-100 text-red-600"
+                        ? "bg-red-100 text-red-600"
+                        : "bg-green-100 text-green-600"
                     }`}
                   >
                     {item.status}
                   </span>
                 </td>
-               
                 <td className="px-4 py-3 flex gap-3 items-center">
                   <button className="text-blue-500 hover:text-blue-700">
                     <FiEdit />
@@ -203,6 +153,7 @@ export default function SurveyorManagement() {
         )}
       </div>
 
+   
       {filteredSurveyors.length > itemsPerPage && (
         <div className="flex justify-end mt-4 gap-4">
           <button
@@ -229,6 +180,12 @@ export default function SurveyorManagement() {
           </button>
         </div>
       )}
+       <CreateUserModal
+        isModalOpen={isModalOpen}
+        setIsModalOpen={setIsModalOpen}
+        setUsers={setSurveyors}
+        role="surveyor" 
+      />
     </div>
   );
 }

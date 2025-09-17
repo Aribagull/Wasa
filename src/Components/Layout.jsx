@@ -8,6 +8,7 @@ import SurveyDetails from "../Page/ApprovalsaData";
 import ProtectedRoute from "../ProtectedRoute/ProtectedRoute";
 import SurveyorManagement from "../Page/SurveyorManagement";
 import TicketStatus from "../Page/Ticket";
+import TicketTabs from "../Page/Ticket";
 
 export default function Layout() {
   return (
@@ -24,7 +25,7 @@ export default function Layout() {
             <Route
               path="/supervisor"
               element={
-                <ProtectedRoute allowedRoles={['admin']}>
+                <ProtectedRoute allowedRoles={['Super Admin']}>
                   <Supervisor />
                 </ProtectedRoute>
               }
@@ -35,30 +36,31 @@ export default function Layout() {
             <Route
               path="/survey-details"
               element={
-                <ProtectedRoute allowedRoles={['admin', 'supervisor']}>
+                <ProtectedRoute allowedRoles={['Super Admin', 'Supervisor']}>
                   <SurveyDetails />
                 </ProtectedRoute>
               }
             />
 
-        
+
             <Route
               path="/surveyor-management"
               element={
-                <ProtectedRoute allowedRoles={['supervisor']}>
-                  <SurveyorManagement/>
+                <ProtectedRoute allowedRoles={['Supervisor']}>
+                  <SurveyorManagement />
                 </ProtectedRoute>
               }
             />
-        
-           <Route
-  path="/ticket-status"
-  element={
-    <ProtectedRoute allowedRoles={['admin', 'supervisor']}>
-      <TicketStatus />
-    </ProtectedRoute>
-  }
-/>
+
+            <Route
+              path="/ticket-status"
+              element={
+                 <ProtectedRoute allowedRoles={['Super Admin', 'Supervisor']}>
+                  <TicketTabs/>
+                </ProtectedRoute>
+              }
+            />
+
 
           </Routes>
         </main>
