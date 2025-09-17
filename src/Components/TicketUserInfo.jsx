@@ -29,17 +29,18 @@ export default function TicketUserInfo({ filter, ticket }) {
         if (res.success && res.data) {
           const data = res.data.data;
 
-          setNewData({
-            consumer: data.consumer || {},
-            connection: data.connection || {},
-            property: data.property || {},
-          });
+         setNewData({
+  consumer: data.temp_consumer || {},
+  connection: data.temp_connection || {},
+  property: data.temp_property || {},
+});
 
-          setOldData({
-            consumer: data.temp_consumer || {},
-            connection: data.temp_connection || {},
-            property: data.temp_property || {},
-          });
+setOldData({
+  consumer: data.consumer || {},
+  connection: data.connection || {},
+  property: data.property || {},
+});
+
         } else {
           setError(res.error || "Failed to fetch data.");
         }

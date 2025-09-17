@@ -158,11 +158,17 @@ export default function TicketTabs() {
                     Ticket Approved
                   </h4>
                   <p className="text-gray-700 text-sm">
-                    Consumer ID:{" "}
-                    <span className="font-medium">
-                      {ticket.temp_consumer?.consumer_code}
-                    </span>
-                  </p>
+                      Name:{" "}
+                      <span className="font-medium">
+                        {ticket.temp_consumer?.full_name ?? "N/A"}
+                      </span>
+                    </p>
+                  <p className="text-gray-700 text-sm">
+                        Consumer ID:{" "}
+                        <span className="font-medium">
+                          {ticket.temp_consumer?.temp_consumer_id ?? "N/A"}
+                        </span>
+                      </p>
                 </div>
               ))}
             </div>
