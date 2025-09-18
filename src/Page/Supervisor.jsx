@@ -158,7 +158,7 @@ export default function Supervisor() {
                 <th className="py-3 px-4">Type</th>
                 <th className="py-3 px-4">Joined Date</th>
                 <th className="py-3 px-4">Status</th>
-                <th className="py-3 px-4 text-right">Actions</th>
+                {/* <th className="py-3 px-4 text-right">Actions</th> */}
               </tr>
             </thead>
             <tbody className="text-sm text-gray-700">
@@ -178,7 +178,7 @@ export default function Supervisor() {
                     </span>
                   </td>
 
-                  <td className="px-4 py-3 text-right space-x-2">
+                  {/* <td className="px-4 py-3 text-right space-x-2">
                     <button
                       onClick={() => handleEdit(item)}
                       className="text-blue-600 hover:text-blue-800"
@@ -193,7 +193,7 @@ export default function Supervisor() {
                     >
                       <FiTrash2 />
                     </button>
-                  </td>
+                  </td> */}
                 </tr>
               ))}
             </tbody>

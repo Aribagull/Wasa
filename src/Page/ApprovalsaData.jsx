@@ -43,35 +43,31 @@ export default function SurveyDetails() {
   useEffect(() => {
     async function fetchData() {
       try {
-        const res = await getAllSurveys(); 
-        const data = res?.data || []; 
+        const res = await getAllSurveys();
+        const data = res?.data || [];
 
         const mappedData = data.map((entry, i) => {
-  const consumer = entry?.consumer || {};
-  const property = entry?.property || {}; 
-  const connection = entry?.connection || {};
-  const survey = entry?.survey || {};
+          const consumer = entry?.consumer || {};
+          const property = entry?.property || {};
+          const connection = entry?.connection || {};
+          const survey = entry?.survey || {};
 
-  return {
-    cid: consumer.consumer_code || connection.consumer_id || "N/A",
-    name: consumer.full_name || "N/A",
-    cnic: consumer.cnic || "N/A",
-    uc: property.uc || survey.uc || "N/A",     
-    status: property.status || connection.connection_status || "N/A",
-    zone: property.zone || survey.zone || "N/A",
-    category: property.category || "N/A",
-    ward: property.ward || survey.ward || "N/A",
-    water_unit: connection.water_unit || "N/A",
-    index: i,
-    fullData: entry,
-    releaseReason: "",
-  };
-})
-  .filter((row) => row.name !== "N/A" && row.cnic !== "N/A"); 
-
-
-
-
+          return {
+            cid: consumer.consumer_code || connection.consumer_id || "N/A",
+            name: consumer.full_name || "N/A",
+            cnic: consumer.cnic || "N/A",
+            uc: property.uc || survey.uc || "N/A",
+            status: property.status || connection.connection_status || "N/A",
+            zone: property.zone || survey.zone || "N/A",
+            category: property.category || "N/A",
+            ward: property.ward || survey.ward || "N/A",
+            water_unit: connection.water_unit || "N/A",
+            index: i,
+            fullData: entry,
+            releaseReason: "",
+          };
+        })
+          .filter((row) => row.name !== "N/A" && row.cnic !== "N/A");
         setTableData(mappedData);
       } catch (error) {
         console.error(error);
@@ -105,8 +101,8 @@ export default function SurveyDetails() {
           title: "Action",
           data: "index",
           orderable: false,
-         render: (data, type, row) =>
-  `<button class="view-btn text-black hover:text-blue-800" data-cid="${row.cid}">
+          render: (data, type, row) =>
+            `<button class="view-btn text-black hover:text-blue-800" data-cid="${row.cid}">
       <i class="fa-regular fa-eye" style="font-size: 10px;"></i>
   </button>`
 
@@ -121,11 +117,11 @@ export default function SurveyDetails() {
     });
 
     $table.on("click", ".view-btn", function () {
-  const cid = $(this).data("cid");
-  const row = tableData.find((r) => r.cid === cid);
-  setSelectedRow(row?.fullData || null);
-  setIsModalOpen(true);
-});
+      const cid = $(this).data("cid");
+      const row = tableData.find((r) => r.cid === cid);
+      setSelectedRow(row?.fullData || null);
+      setIsModalOpen(true);
+    });
 
 
     return () => {
@@ -204,7 +200,7 @@ export default function SurveyDetails() {
         onUpdateStatus={handleUpdateStatus}
       />
 
-    
+
       {toast && (
         <div className="fixed top-5 right-5 bg-green-100 text-black text-sm px-4 py-2 rounded shadow-lg animate-slide-in">
           {toast}

@@ -108,10 +108,10 @@ export default function SurveyorManagement() {
               <th className="py-3 px-4">Name</th>
               <th className="py-3 px-4">Email</th>
               <th className="py-3 px-4">Phone</th>
-              <th className="py-3 px-4">Type</th>
+              {/* <th className="py-3 px-4">Type</th> */}
               <th className="py-3 px-4">Joined Date</th>
               <th className="py-3 px-4">Status</th>
-              <th className="py-3 px-4">Actions</th>
+              {/* <th className="py-3 px-4">Actions</th> */}
             </tr>
           </thead>
           <tbody className="text-sm text-gray-700">
@@ -120,7 +120,7 @@ export default function SurveyorManagement() {
                 <td className="px-4 py-3">{item.full_name}</td>
                 <td className="px-4 py-3">{item.email}</td>
                 <td className="px-4 py-3">{item.phone}</td>
-                <td className="px-4 py-3">{item.type}</td>
+                {/* <td className="px-4 py-3">{item.type}</td> */}
                 <td className="px-4 py-3">{item.created_at}</td>
                 <td className="px-4 py-3">
                   <span
@@ -133,14 +133,11 @@ export default function SurveyorManagement() {
                     {item.status}
                   </span>
                 </td>
-                <td className="px-4 py-3 flex gap-3 items-center">
+                {/* <td className="px-9 py-3">
                   <button className="text-blue-500 hover:text-blue-700">
                     <FiEdit />
                   </button>
-                  <button className="text-red-500 hover:text-red-700">
-                    <FiTrash2 />
-                  </button>
-                </td>
+                </td> */}
               </tr>
             ))}
           </tbody>
