@@ -8,6 +8,8 @@ export default function ApprovalAction({ isOpen, onClose, row, onUpdateStatus })
   const [activeTab, setActiveTab] = useState("consumer");
   const [showReasonBox, setShowReasonBox] = useState(false);
   const [rejectionReason, setRejectionReason] = useState("");
+  const [popupMessage, setPopupMessage] = useState("");
+  const [popupType, setPopupType] = useState(""); 
 
   useEffect(() => {
     if (isOpen && row) {
@@ -54,13 +56,19 @@ export default function ApprovalAction({ isOpen, onClose, row, onUpdateStatus })
     ));
   };
 
+  const showToast = (message, type) => {
+    setPopupMessage(message);
+    setPopupType(type);
+    setTimeout(() => setPopupMessage(""), 3000); 
+  };
+
   const handleRelease = async () => {
     if (!showReasonBox) {
       setShowReasonBox(true);
       return;
     }
     if (!rejectionReason.trim()) {
-      onUpdateStatus(null, null, null, "Please enter a reason before releasing the ticket.");
+      showToast("⚠️ Please enter a reason before releasing the ticket.", "error");
       return;
     }
 
@@ -77,16 +85,18 @@ export default function ApprovalAction({ isOpen, onClose, row, onUpdateStatus })
         result.data,
         "Ticket released successfully!"
       );
+      showToast("Ticket released successfully!", "success");
       setRejectionReason("");
       setShowReasonBox(false);
       onClose();
     } else {
-      onUpdateStatus(null, null, null, result.error || "Failed to release ticket.");
+      showToast(result.error || "Failed to release ticket.", "error");
     }
   };
 
   const handleApprove = () => {
     onUpdateStatus(consumer.consumer_code, "Approved", null, null, "Ticket approved successfully!");
+    showToast("Ticket approved successfully!", "success");
     onClose();
   };
 
@@ -101,7 +111,7 @@ export default function ApprovalAction({ isOpen, onClose, row, onUpdateStatus })
         }`}
         onClick={(e) => e.stopPropagation()}
       >
-      
+
         <div className="flex justify-between items-center px-2 py-3 border-b">
           <h2 className="text-lg font-semibold text-[#1e1e60] flex items-center gap-3">
             <BiSolidUserDetail size={28} /> WASA Customer Details
@@ -128,9 +138,8 @@ export default function ApprovalAction({ isOpen, onClose, row, onUpdateStatus })
           </div>
         </div>
 
-     
         <div className="flex justify-around border-b px-4 py-3 text-sm font-medium bg-gray-50 mt-3">
-          {["consumer", "property", "connection", "survey",].map((tab) => (
+          {["consumer", "property", "connection", "survey"].map((tab) => (
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
@@ -142,7 +151,6 @@ export default function ApprovalAction({ isOpen, onClose, row, onUpdateStatus })
             </button>
           ))}
         </div>
-
 
         {activeTab === "consumer" && (
           <div className="p-4 grid grid-cols-3 gap-4 text-xs">
@@ -179,18 +187,7 @@ export default function ApprovalAction({ isOpen, onClose, row, onUpdateStatus })
             </div>
           </div>
         )}
-        {activeTab === "supervisor" && (
-          <div className="p-4 grid grid-cols-3 gap-4 text-xs">
-            {renderFields(supervisor, ["name", "email", "phone_number"])}
-          </div>
-        )}
-        {activeTab === "surveyor" && (
-          <div className="p-4 grid grid-cols-3 gap-4 text-xs">
-            {renderFields(surveyor, ["name", "email", "phone_number"])}
-          </div>
-        )}
 
-      
         {showReasonBox && (
           <div className="px-6 py-4 bg-red-50">
             <label className="block text-xs font-medium text-red-800 mb-1">
@@ -206,7 +203,6 @@ export default function ApprovalAction({ isOpen, onClose, row, onUpdateStatus })
           </div>
         )}
 
-   
         <div className="flex justify-between items-center px-6 py-4">
           <button
             onClick={handleRelease}
@@ -221,6 +217,15 @@ export default function ApprovalAction({ isOpen, onClose, row, onUpdateStatus })
             Approve
           </button>
         </div>
+
+        {popupMessage && (
+          <div
+            className={`fixed top-5 right-5 px-4 py-2 rounded shadow-md text-white text-sm transition-all duration-300
+            ${popupType === "success" ? "bg-green-500" : "bg-red-500"}`}
+          >
+            {popupMessage}
+          </div>
+        )}
       </div>
     </div>
   );
