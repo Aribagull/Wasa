@@ -1,8 +1,7 @@
 import { useEffect, useState } from "react";
 import { HiOutlineUsers, HiOutlineDocumentText } from "react-icons/hi2";
 import CreateSupervisorModal from "./CreateSupervisorModal";
-import { FiSearch, FiEdit, FiTrash2, FiPlusCircle } from "react-icons/fi";
-import { FiChevronLeft, FiChevronRight } from "react-icons/fi";
+import { FiSearch, FiPlusCircle, FiChevronLeft, FiChevronRight } from "react-icons/fi";
 import { FaUsersCog } from "react-icons/fa";
 import { getSupervisors, getSurveyors } from "../API/index.js";
 import CreateUserModal from "./CreateSurveyorForm.jsx";
@@ -17,7 +16,6 @@ export default function Supervisor() {
   const [loading, setLoading] = useState(false);
 
   const itemsPerPage = 3;
-
 
   useEffect(() => {
     const fetchData = async () => {
@@ -42,10 +40,9 @@ export default function Supervisor() {
 
   const filteredData = (activeTab === "Supervisors" ? supervisors : surveyors).filter(
     (item) =>
-      item.full_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      item.email.toLowerCase().includes(searchTerm.toLowerCase())
+      item.full_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      item.email?.toLowerCase().includes(searchTerm.toLowerCase())
   );
-
 
   const totalPages = Math.ceil(filteredData.length / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
@@ -56,24 +53,14 @@ export default function Supervisor() {
     setCurrentPage(1);
   }, [searchTerm, activeTab]);
 
-  const handleEdit = (item) => {
-    console.log("Edit clicked for:", item);
-  };
-
-  const handleDelete = (item) => {
-    const confirmDelete = window.confirm(`Are you sure you want to delete ${item.name}?`);
-    if (confirmDelete) {
-      console.log("Deleted:", item);
-    }
-  };
-
   return (
     <div className="px-3 py-6">
       <div className="flex items-center gap-3">
         <FaUsersCog className="text-2xl mb-3 text-blue-600" />
-        <h1 className="text-base font-semibold mb-3"> Supervisor & Surveyor Management</h1>
+        <h1 className="text-base font-semibold mb-3">Supervisor & Surveyor Management</h1>
       </div>
 
+      {/* Stats */}
       <div className="grid grid-cols-1 w-[50%] sm:grid-cols-2 gap-4 mb-4">
         <div className="bg-white rounded-lg p-4">
           <div className="flex items-center justify-between">
@@ -102,21 +89,24 @@ export default function Supervisor() {
         </div>
       </div>
 
+      {/* Tabs */}
       <div className="flex gap-2 border-b mb-4">
         {["Supervisors", "Surveyors"].map((tab) => (
           <button
             key={tab}
             onClick={() => setActiveTab(tab)}
-            className={`px-4 py-2 text-sm font-medium ${activeTab === tab
+            className={`px-4 py-2 text-sm font-medium ${
+              activeTab === tab
                 ? "text-blue-600 border-b-2 border-blue-600"
                 : "text-gray-500 hover:text-blue-500"
-              }`}
+            }`}
           >
             {tab}
           </button>
         ))}
       </div>
 
+      {/* Top bar */}
       <div className="flex items-center justify-between mb-2">
         <h2 className="text-lg font-semibold">
           {activeTab === "Supervisors" ? "All Supervisors" : "All Surveyors"}
@@ -125,11 +115,14 @@ export default function Supervisor() {
           onClick={() => setIsModalOpen(true)}
           className="bg-blue-600 hover:bg-blue-700 text-white px-2 py-2 rounded text-xs flex items-center gap-2"
         >
-          <span className="text-xs"><FiPlusCircle /></span>{" "}
+          <span className="text-xs">
+            <FiPlusCircle />
+          </span>{" "}
           {activeTab === "Supervisors" ? "Create Supervisor" : "Create Surveyor"}
         </button>
       </div>
 
+      {/* Search */}
       <div className="relative my-3">
         <input
           type="text"
@@ -145,8 +138,9 @@ export default function Supervisor() {
         </div>
       </div>
 
+      {/* Table */}
       {loading ? (
-        <p className="text-center py-6 text-gray-500"></p>
+        <p className="text-center py-6 text-gray-500">Loading...</p>
       ) : (
         <div className="bg-white overflow-x-auto">
           <table className="min-w-full">
@@ -158,7 +152,6 @@ export default function Supervisor() {
                 <th className="py-3 px-4">Type</th>
                 <th className="py-3 px-4">Joined Date</th>
                 <th className="py-3 px-4">Status</th>
-                {/* <th className="py-3 px-4 text-right">Actions</th> */}
               </tr>
             </thead>
             <tbody className="text-sm text-gray-700">
@@ -170,30 +163,16 @@ export default function Supervisor() {
                   <td className="px-4 py-3">{item.role_id}</td>
                   <td className="px-4 py-3">{item.created_at?.slice(0, 10)}</td>
                   <td className="px-4 py-3">
-                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${item.status === "Active"
-                        ? "bg-green-100 text-green-600"
-                        : "bg-red-100 text-red-600"
-                      }`}>
+                    <span
+                      className={`px-2 py-1 rounded-full text-xs font-medium ${
+                        item.status === "active"
+                          ? "bg-green-100 text-green-600"
+                          : "bg-red-100 text-red-600"
+                      }`}
+                    >
                       {item.status}
                     </span>
                   </td>
-
-                  {/* <td className="px-4 py-3 text-right space-x-2">
-                    <button
-                      onClick={() => handleEdit(item)}
-                      className="text-blue-600 hover:text-blue-800"
-                      title="Edit"
-                    >
-                      <FiEdit />
-                    </button>
-                    <button
-                      onClick={() => handleDelete(item)}
-                      className="text-red-600 hover:text-red-800"
-                      title="Delete"
-                    >
-                      <FiTrash2 />
-                    </button>
-                  </td> */}
                 </tr>
               ))}
             </tbody>
@@ -201,43 +180,47 @@ export default function Supervisor() {
         </div>
       )}
 
+      {/* Pagination */}
       <div className="flex justify-end mt-4 gap-4">
         <button
           onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
           disabled={currentPage === 1}
-          className={`p-2 rounded-full border transition ${currentPage === 1
+          className={`p-2 rounded-full border transition ${
+            currentPage === 1
               ? "text-gray-400 border-gray-200"
               : "text-blue-600 border-blue-300 hover:bg-blue-100"
-            }`}
+          }`}
         >
           <FiChevronLeft className="w-3 h-3" />
         </button>
         <button
           onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
           disabled={currentPage === totalPages}
-          className={`p-2 rounded-full border transition ${currentPage === totalPages
+          className={`p-2 rounded-full border transition ${
+            currentPage === totalPages
               ? "text-gray-400 border-gray-200"
               : "text-blue-600 border-blue-300 hover:bg-blue-100"
-            }`}
+          }`}
         >
           <FiChevronRight className="w-3 h-3" />
         </button>
       </div>
 
+      {/* Modals */}
       {activeTab === "Supervisors" ? (
-  <CreateSupervisorModal
-    isModalOpen={isModalOpen}
-    setIsModalOpen={setIsModalOpen}
-    setUsers={setSupervisors} 
-  />
-) : (
-  <CreateUserModal
-    isModalOpen={isModalOpen}
-    setIsModalOpen={setIsModalOpen}
-    setUsers={setSurveyors} 
-    role="surveyor"
-  />
-)}
+        <CreateSupervisorModal
+          isModalOpen={isModalOpen}
+          setIsModalOpen={setIsModalOpen}
+          setUsers={setSupervisors}
+        />
+      ) : (
+        <CreateUserModal
+          isModalOpen={isModalOpen}
+          setIsModalOpen={setIsModalOpen}
+          setUsers={setSurveyors}
+          role="surveyor"
+        />
+      )}
     </div>
   );
 }

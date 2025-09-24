@@ -24,24 +24,32 @@ export async function loginUser({ email, password }) {
 export async function createSupervisor(newSupervisor) {
   try {
     const response = await axiosInstance.post("/users/create", newSupervisor);
-    const data = Array.isArray(response.data) ? response.data[0] : response.data;
+    if (Array.isArray(response.data)) {
+      const [data, statusCode] = response.data;
 
-    return data;
+      return {
+        data,
+        status: statusCode, 
+      };
+    }
+
+    return { data: response.data, status: response.status };
   } catch (error) {
     console.error("Supervisor create error:", error);
+
     return {
-      success: false,
-      message:
-        error.response?.data?.[0]?.message ||
-        error.response?.data?.message ||
-        error.message ||
-        "Network error while creating supervisor.",
+      data: {
+        success: false,
+        message:
+          error.response?.data?.[0]?.message ||
+          error.response?.data?.message ||
+          error.message ||
+          "Network error while creating supervisor.",
+      },
+      status: error.response?.status || 500,
     };
   }
 }
-
-
-
 
 
 // RELEASE TICKET

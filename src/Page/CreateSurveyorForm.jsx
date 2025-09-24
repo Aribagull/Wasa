@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react"; 
 import { createSupervisor } from "../API/index.js";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
 
@@ -20,24 +20,13 @@ export default function CreateUserModal({ isModalOpen, setIsModalOpen, setUsers,
       : "882e8ff3-8062-443d-9ea5-09649a0d79b1",
   });
 
-
-
-  const isEmailValid = (email) => {
-    return /\S+@\S+\.\S+/.test(email); 
-  };
-
-  const isPhoneValid = (phone) => {
-    return /^\d{11}$/.test(phone);
-  };
-
-  const isFormValid = () => {
-    return (
-      newUser.full_name.trim() !== "" &&
-      isPhoneValid(newUser.phone) &&
-      isEmailValid(newUser.email) &&
-      newUser.password.trim() !== ""
-    );
-  };
+  const isEmailValid = (email) => /\S+@\S+\.\S+/.test(email);
+  const isPhoneValid = (phone) => /^\d{11}$/.test(phone);
+  const isFormValid = () =>
+    newUser.full_name.trim() !== "" &&
+    isPhoneValid(newUser.phone) &&
+    isEmailValid(newUser.email) &&
+    newUser.password.trim() !== "";
 
   const handleCreate = async () => {
     if (!isFormValid()) {
@@ -48,10 +37,18 @@ export default function CreateUserModal({ isModalOpen, setIsModalOpen, setUsers,
 
     setLoading(true);
     try {
-      const { success, data, status } = await createSupervisor(newUser);
+      const response = await createSupervisor(newUser);
+      console.log("API Response:", response);
 
-      if (success && status === 200) {
-        setUsers(prev => [...prev, newUser]);
+      const { data, status } = response;
+
+      if (data.success && (status === 200 || status === 201)) {
+        const newCreatedUser = {
+          ...newUser,
+          id: data.user_id,
+        };
+
+        setUsers((prev) => [...prev, newCreatedUser]);
         setToastMessage(`${role.charAt(0).toUpperCase() + role.slice(1)} created successfully!`);
         setToastType("success");
 
@@ -64,12 +61,14 @@ export default function CreateUserModal({ isModalOpen, setIsModalOpen, setUsers,
           status: "active",
           role_id: newUser.role_id,
         });
+
         setIsModalOpen(false);
       } else {
         setToastMessage(data.message || "User creation failed.");
         setToastType("error");
       }
     } catch (error) {
+      console.error("Create User Error:", error);
       setToastMessage("Network error while creating user.");
       setToastType("error");
     } finally {
@@ -89,7 +88,6 @@ export default function CreateUserModal({ isModalOpen, setIsModalOpen, setUsers,
       {isModalOpen && (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-30 z-50">
           <div className="bg-white p-6 rounded shadow-lg w-[500px] max-w-full relative">
-
             <button
               onClick={() => setIsModalOpen(false)}
               className="absolute top-2 right-2 text-gray-500 hover:text-gray-800 text-lg font-bold"
@@ -100,18 +98,16 @@ export default function CreateUserModal({ isModalOpen, setIsModalOpen, setUsers,
             <h3 className="text-lg font-semibold mb-4">Create {role.charAt(0).toUpperCase() + role.slice(1)}</h3>
 
             <div className="grid grid-cols-2 gap-4 mb-4">
-
               <div>
-  <label className="block text-sm font-medium mb-1">Username</label>
-  <input
-    type="text"
-    placeholder="survoyer01"
-    value={newUser.username}
-    onChange={(e) => setNewUser({ ...newUser, username: e.target.value })}
-    className="border px-3 py-1 rounded w-full focus:border-blue-500 focus:outline-none focus:ring-0 text-sm"
-  />
-</div>
-
+                <label className="block text-sm font-medium mb-1">Username</label>
+                <input
+                  type="text"
+                  placeholder="surveyor01"
+                  value={newUser.username}
+                  onChange={(e) => setNewUser({ ...newUser, username: e.target.value })}
+                  className="border px-3 py-1 rounded w-full focus:border-blue-500 focus:outline-none focus:ring-0 text-sm"
+                />
+              </div>
 
               <div>
                 <label className="block text-sm font-medium mb-1">Full Name</label>
@@ -192,7 +188,9 @@ export default function CreateUserModal({ isModalOpen, setIsModalOpen, setUsers,
               </button>
               <button
                 onClick={handleCreate}
-                className={`px-4 py-2 rounded text-white ${isFormValid() ? "bg-blue-600 hover:bg-blue-700" : "bg-gray-400 cursor-not-allowed"}`}
+                className={`px-4 py-2 rounded text-white ${
+                  isFormValid() ? "bg-blue-600 hover:bg-blue-700" : "bg-gray-400 cursor-not-allowed"
+                }`}
                 disabled={loading || !isFormValid()}
               >
                 {loading ? "Creating..." : "Create"}
@@ -200,11 +198,14 @@ export default function CreateUserModal({ isModalOpen, setIsModalOpen, setUsers,
             </div>
 
             {toastMessage && (
-              <div className={`fixed top-5 right-5 px-4 py-2 rounded shadow-lg text-white ${toastType === "success" ? "bg-green-500" : "bg-red-500"}`}>
+              <div
+                className={`fixed top-5 right-5 px-4 py-2 rounded shadow-lg text-white ${
+                  toastType === "success" ? "bg-green-500" : "bg-red-500"
+                }`}
+              >
                 {toastMessage}
               </div>
             )}
-
           </div>
         </div>
       )}
