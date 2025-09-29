@@ -1,187 +1,109 @@
-import React from "react";
-import { FaUser, FaHome, FaPlug, FaClipboardList } from "react-icons/fa";
+import React, { useState } from "react";
+import { FaUser, FaHome, FaPlug } from "react-icons/fa";
+import { RiArrowDropDownLine, RiArrowDropUpLine } from "react-icons/ri";
 
 export default function ConsumerDetailCards({ consumer }) {
-  if (!consumer) return null;
+  const [openConnections, setOpenConnections] = useState([]);
 
-  const propertyImages = consumer.images?.length
-    ? consumer.images.map((img) => img.uri)
-    : [
-        "https://777properties.com/wp-content/uploads/2023/11/pexels-pixabay-269077-jpg.webp",
-        "https://777properties.com/wp-content/uploads/2023/11/pexels-pixabay-269077-jpg.webp",
-      ];
+  if (!consumer) return <p>No consumer data found.</p>;
 
-  const InfoFourCol = ({ labels, values }) => (
-    <div className="mb-4">
-      <div className="grid grid-cols-4 gap-4 text-xs text-gray-500">
-        {labels.map((label, i) => (
-          <p key={i}>{label}</p>
-        ))}
-      </div>
-      <div className="grid grid-cols-4 gap-4 text-sm font-medium text-gray-800">
-        {values.map((value, i) => (
-          <p key={i}>{value || "-"}</p>
-        ))}
-      </div>
-    </div>
-  );
+  const toggleConnection = (key) => {
+    setOpenConnections((prev) =>
+      prev.includes(key) ? prev.filter((id) => id !== key) : [...prev, key]
+    );
+  };
+
+
+  const formatKey = (key) => key.replace(/_/g, " ").replace(/\b\w/g, (l) => l.toUpperCase());
+
+
+  const renderKeyValue = (obj) => {
+    return Object.entries(obj).map(([key, value]) => {
+      if (Array.isArray(value) || typeof value === "object" || value === null) return null; // skip nested
+      return (
+        <p key={key} className="text-sm text-gray-600">
+          <span className="text-gray-800">{formatKey(key)}:</span>{" "}
+          <p className="font-semibold">{String(value) || "N/A"}</p>
+        </p>
+      );
+    });
+  };
 
   return (
-    <div className="flex flex-col gap-3 mt-10">
-   
-      <div className="bg-white rounded-lg p-5 w-full">
-        <h2 className="text-xl flex items-center gap-2 font-semibold text-blue-600 mb-4 border-b pb-1">
-          <FaUser />Consumer Info
-        </h2>
-        <InfoFourCol
-          labels={["Consumer Code", "Name", "Phone", "CNIC"]}
-          values={[
-            consumer.consumer.consumer_code,
-            consumer.consumer.full_name,
-            consumer.consumer.phone,
-            consumer.consumer.cnic,
-          ]}
-        />
-        <InfoFourCol
-          labels={["Zone", "Address", "UC", "Ward"]}
-          values={[
-            consumer.consumer.zone,
-            consumer.consumer.address,
-            consumer.consumer.uc,
-            consumer.consumer.ward,
-          ]}
-        />
-        <InfoFourCol
-          labels={["WhatsApp", "Email", "Reg. Date", "WASA Employee"]}
-          values={[
-            consumer.consumer.whatsapp,
-            consumer.consumer.email,
-            consumer.consumer.registration_date,
-            consumer.consumer.wasa_employee ? "Yes" : "No",
-          ]}
-        />
-        <InfoFourCol
-          labels={["Remarks", "Active", "Latitude", "Longitude"]}
-          values={[
-            consumer.consumer.remarks,
-            consumer.consumer.is_active ? "Yes" : "No",
-            consumer.consumer.location?.latitude,
-            consumer.consumer.location?.longitude,
-          ]}
-        />
-      </div>
+    <div className="flex flex-col gap-6 mt-1">
+ 
+      <div className="bg-white px-6 py-2">
+  <div className="mt-6 grid grid-cols-4 gap-4 text-sm ml-5 text-gray-600">
+    {Object.entries(consumer).map(([key, value]) => {
+      if (
+        typeof value === "object" ||
+        Array.isArray(value) ||
+        key === "full_name" ||
+        key === "consumer_id" ||
+        key === "properties"
+      )
+        return null;
 
-     
-      <div className="bg-white rounded-lg p-5 w-full">
-        <h2 className="text-xl flex items-center gap-2 font-semibold text-blue-600 mb-4 border-b pb-1">
-          <FaHome/>Property Details
-        </h2>
+      return (
+        <div key={key}>
+          <p className="text-gray-800">{key.replace(/_/g, " ")}</p>
+          <p className="font-semibold">{String(value) || "N/A"}</p>
+        </div>
+      );
+    })}
+  </div>
+</div>
 
-        <div className="flex flex-col md:flex-row gap-6">
-          <div className="flex-1">
-            <InfoFourCol
-              labels={["Category", "Ferrule Size", "Water Quality", "Water Connection"]}
-              values={[
-                consumer.premiseDetails.category,
-                consumer.premiseDetails.ferrule_size,
-                consumer.premiseDetails.water_quality,
-                consumer.premiseDetails.water_connection ? "Yes" : "No",
-              ]}
-            />
-            <InfoFourCol
-              labels={["Stories", "Legal", "Plot Size", "Status"]}
-              values={[
-                consumer.premiseDetails.stories,
-                consumer.premiseDetails.legal ? "Yes" : "No",
-                consumer.premiseDetails.plot_size,
-                consumer.premiseDetails.status,
-              ]}
-            />
-            <InfoFourCol
-              labels={["Well", "Bore Aquifer", "Domestic", "Commercial"]}
-              values={[
-                consumer.premiseDetails.well ? "Yes" : "No",
-                consumer.premiseDetails.bore_aquifer ? "Yes" : "No",
-                consumer.premiseDetails.domestic ? "Yes" : "No",
-                consumer.premiseDetails.commercial ? "Yes" : "No",
-              ]}
-            />
+
+
+
+      {consumer.properties?.map((property, idx) => (
+        <div key={idx} className="bg-white p-6">
+          <div className="flex items-center justify-between mb-3">
+            <h3 className="text-md font-semibold text-blue-600 flex items-center gap-2 uppercase">
+              <FaHome /> Property {idx + 1}
+            </h3>
           </div>
 
-     
-          <div className="">
-            <h3 className="text-md font-semibold text-gray-700 mb-2">Images</h3>
-            <div className="flex flex-col gap-3">
-              {propertyImages.map((img, idx) => (
-                <img
-                  key={idx}
-                  src={img}
-                  alt={`Property ${idx + 1}`}
-                  className="w-44 h-20 object-cover rounded-lg shadow"
-                />
-              ))}
-            </div>
+          <div className="grid grid-cols-4 gap-4 mb-4">
+            {renderKeyValue(property)}
+          </div>
+
+
+          <div className="mt-4">
+            <h4 className="font-semibold text-blue-600 mb-2 flex items-center gap-2 uppercase"><FaPlug />Connections</h4>
+            {property.connections?.map((conn, cIdx) => {
+              const key = `${idx}-${cIdx}`;
+              return (
+                <div key={cIdx} className="border rounded mb-2">
+                  <button
+                    className="w-full flex justify-between items-center px-4 py-2 bg-gray-50 text-sm font-medium text-gray-700"
+                    onClick={() => toggleConnection(key)}
+                  >
+                    <span className="flex items-center gap-2">
+                      <FaPlug /> Connection {cIdx + 1}
+                    </span>
+                    <span>
+  {openConnections.includes(key) ? (
+    <RiArrowDropUpLine className="text-xl" />
+  ) : (
+    <RiArrowDropDownLine className="text-xl" />
+  )}
+</span>
+
+                  </button>
+
+                  {openConnections.includes(key) && (
+                    <div className="p-4 grid grid-cols-4 gap-4 ">
+                      {renderKeyValue(conn)}
+                    </div>
+                  )}
+                </div>
+              );
+            })}
           </div>
         </div>
-      </div>
-
-     
-      <div className=" bg-white rounded-lg p-5 w-full">
-        <h2 className="text-xl flex items-center gap-2 font-semibold text-blue-600 mb-4 border-b pb-1">
-          <FaPlug/>Connection Details
-        </h2>
-        <InfoFourCol
-          labels={["Connection Status", "Meter No", "Water Unit", "Sewerage Unit"]}
-          values={[
-            consumer.connection_details.connection_status,
-            consumer.connection_details.meter_number,
-            consumer.connection_details.water_unit,
-            consumer.connection_details.sewerage_unit,
-          ]}
-        />
-        <InfoFourCol
-          labels={["Water Cat. (Existing)", "Water Cat. (Proposed)", "Legal", "Installed At"]}
-          values={[
-            consumer.connection_details.water_category_existing,
-            consumer.connection_details.water_category_proposed,
-            consumer.connection_details.legal ? "Yes" : "No",
-            consumer.connection_details.installed_at,
-          ]}
-        />
-        <InfoFourCol
-          labels={["Sewerage Cat. (Existing)", "Sewerage Cat. (Proposed)", "Inspected At", "Remarks"]}
-          values={[
-            consumer.connection_details.sewerage_category_existing,
-            consumer.connection_details.sewerage_category_proposed,
-            consumer.connection_details.last_inspected_at,
-            consumer.connection_details.remarks,
-          ]}
-        />
-      </div>
-
-      <div className="bg-white rounded-lg p-5 w-full">
-        <h2 className="text-xl flex items-center gap-2 font-semibold text-blue-600 mb-4 border-b pb-1">
-          <FaClipboardList/>Survey Info
-        </h2>
-        <InfoFourCol
-          labels={["Surveyor ID", "Survey Type", "Survey Status", "Supervisor ID"]}
-          values={[
-            consumer.survey_data.surveyor_id,
-            consumer.survey_data.survey_type,
-            consumer.survey_data.survey_status,
-            consumer.survey_data.supervisor_id,
-          ]}
-        />
-        <InfoFourCol
-          labels={["Supervisor Comment", "Remarks", "Latitude", "Longitude"]}
-          values={[
-            consumer.survey_data.supervisor_comment,
-            consumer.survey_data.remarks,
-            consumer.survey_data.gps_latitude,
-            consumer.survey_data.gps_longitude,
-          ]}
-        />
-      </div>
+      ))}
     </div>
   );
 }

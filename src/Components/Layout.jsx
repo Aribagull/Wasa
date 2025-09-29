@@ -7,7 +7,6 @@ import ConsumerDetails from "../Page/ConsumerDetails";
 import SurveyDetails from "../Page/ApprovalsaData";
 import ProtectedRoute from "../ProtectedRoute/ProtectedRoute";
 import SurveyorManagement from "../Page/SurveyorManagement";
-import TicketStatus from "../Page/Ticket";
 import TicketTabs from "../Page/Ticket";
 
 export default function Layout() {
@@ -20,8 +19,14 @@ export default function Layout() {
 
         <main className="px-2 flex-1 overflow-y-auto">
           <Routes>
-            <Route path="/" element={<Dashboard />} />
-
+            <Route
+              path="/"
+              element={
+                <ProtectedRoute allowedRoles={['Super Admin', 'Supervisor', 'Surveyor']}>
+                  <Dashboard />
+                </ProtectedRoute>
+              }
+            />
             <Route
               path="/supervisor"
               element={
@@ -31,7 +36,14 @@ export default function Layout() {
               }
             />
 
-            <Route path="/consumer-details" element={<ConsumerDetails />} />
+            <Route
+              path="/consumer-details"
+              element={
+                <ProtectedRoute allowedRoles={['Super Admin', 'Supervisor', 'Surveyor']}>
+                  <ConsumerDetails />
+                </ProtectedRoute>
+              }
+            />
 
             <Route
               path="/survey-details"
@@ -41,7 +53,6 @@ export default function Layout() {
                 </ProtectedRoute>
               }
             />
-
 
             <Route
               path="/surveyor-management"
@@ -55,13 +66,11 @@ export default function Layout() {
             <Route
               path="/ticket-status"
               element={
-                 <ProtectedRoute allowedRoles={['Super Admin', 'Supervisor']}>
+                <ProtectedRoute allowedRoles={['Super Admin', 'Supervisor']}>
                   <TicketTabs/>
                 </ProtectedRoute>
               }
             />
-
-
           </Routes>
         </main>
       </div>

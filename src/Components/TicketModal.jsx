@@ -83,30 +83,37 @@ export default function TicketModal({ ticket, onClose, onUpdate, allTickets = []
     <div className="flex flex-col h-full">
     
       {showOverlay && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 ">
-          <div className="bg-white w-[81%] h-[90vh] rounded-lg shadow-lg flex flex-col p-4 ">
-            <div className="flex justify-between items-center border-b pb-2 mb-2">
-              <h2 className="text-blue-600 font-semibold text-sm">
-                {filter === "new"
-                  ? "New Data"
-                  : filter === "old"
-                  ? "Old Data"
-                  : "Split View"}
-              </h2>
-              <button
-                onClick={() => setShowOverlay(false)} 
-                className="px-3 py-1 text-xs bg-gray-200 text-gray-700 rounded hover:bg-gray-300"
-              >
-                ← Back
-              </button>
-            </div>
+  <div
+    className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
+    onClick={() => setShowOverlay(false)} 
+  >
+    <div
+      className="bg-white w-[81%] h-[90vh] rounded-lg shadow-lg flex flex-col p-4"
+      onClick={(e) => e.stopPropagation()}
+    >
+      <div className="flex justify-between items-center border-b pb-2 mb-2">
+        <h2 className="text-blue-600 font-semibold text-sm">
+          {filter === "new"
+            ? "New Data"
+            : filter === "old"
+            ? "Old Data"
+            : "Split View"}
+        </h2>
+        <button
+          onClick={() => setShowOverlay(false)}
+          className="px-3 py-1 text-xs bg-gray-200 text-gray-700 rounded hover:bg-gray-300"
+        >
+          ← Back
+        </button>
+      </div>
 
-            <div className="flex-1 overflow-auto">
-              <TicketUserInfo ticket={ticket} filter={filter} />
-            </div>
-          </div>
-        </div>
-      )}
+      <div className="flex-1 overflow-auto">
+        <TicketUserInfo ticket={ticket} filter={filter} />
+      </div>
+    </div>
+  </div>
+)}
+
 
       <div className="mb-2 bg-white p-4">
         <div className="flex items-center justify-between text-sm text-gray-700 mb-2">

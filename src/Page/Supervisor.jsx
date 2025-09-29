@@ -15,7 +15,7 @@ export default function Supervisor() {
   const [surveyors, setSurveyors] = useState([]);
   const [loading, setLoading] = useState(false);
 
-  const itemsPerPage = 3;
+  const itemsPerPage = 10;
 
   useEffect(() => {
     const fetchData = async () => {
@@ -59,8 +59,6 @@ export default function Supervisor() {
         <FaUsersCog className="text-2xl mb-3 text-blue-600" />
         <h1 className="text-base font-semibold mb-3">Supervisor & Surveyor Management</h1>
       </div>
-
-      {/* Stats */}
       <div className="grid grid-cols-1 w-[50%] sm:grid-cols-2 gap-4 mb-4">
         <div className="bg-white rounded-lg p-4">
           <div className="flex items-center justify-between">
@@ -89,7 +87,6 @@ export default function Supervisor() {
         </div>
       </div>
 
-      {/* Tabs */}
       <div className="flex gap-2 border-b mb-4">
         {["Supervisors", "Surveyors"].map((tab) => (
           <button
@@ -106,7 +103,6 @@ export default function Supervisor() {
         ))}
       </div>
 
-      {/* Top bar */}
       <div className="flex items-center justify-between mb-2">
         <h2 className="text-lg font-semibold">
           {activeTab === "Supervisors" ? "All Supervisors" : "All Surveyors"}
@@ -122,7 +118,6 @@ export default function Supervisor() {
         </button>
       </div>
 
-      {/* Search */}
       <div className="relative my-3">
         <input
           type="text"
@@ -138,7 +133,6 @@ export default function Supervisor() {
         </div>
       </div>
 
-      {/* Table */}
       {loading ? (
         <p className="text-center py-6 text-gray-500">Loading...</p>
       ) : (
@@ -180,7 +174,6 @@ export default function Supervisor() {
         </div>
       )}
 
-      {/* Pagination */}
       <div className="flex justify-end mt-4 gap-4">
         <button
           onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
@@ -206,7 +199,6 @@ export default function Supervisor() {
         </button>
       </div>
 
-      {/* Modals */}
       {activeTab === "Supervisors" ? (
         <CreateSupervisorModal
           isModalOpen={isModalOpen}

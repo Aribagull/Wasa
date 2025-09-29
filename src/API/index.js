@@ -215,6 +215,17 @@ export async function getRoles() {
   }
 }
 
+// GET ALL CONSUMER BY ID
+export async function getConsumers() {
+  try {
+    const response = await axiosInstance.get("/consumers");
+    return response.data; 
+  } catch (error) {
+    console.error("Error fetching consumers:", error);
+    throw new Error(error.response?.data?.message || "Error fetching consumers.");
+  }
+}
+
 
 
 

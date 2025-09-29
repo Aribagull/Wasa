@@ -32,12 +32,14 @@ export default function TicketTabs() {
   }, []);
 
 
-  const closedTickets = allTickets.filter(
-    (t) => t.status?.toLowerCase() === "approved"
-  );
-  const openTickets = allTickets.filter(
-    (t) => t.status?.toLowerCase() === "open"
-  );
+  const closedTickets = allTickets
+  .filter((t) => t.status?.toLowerCase() === "approved")
+  .sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+
+const openTickets = allTickets
+  .filter((t) => t.status?.toLowerCase() === "open")
+  .sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+
 
   const handleUpdate = async (ticketId, status, reason, issue) => {
     if (status === "Approved") {
@@ -127,10 +129,6 @@ export default function TicketTabs() {
                           {ticket.temp_consumer?.temp_consumer_id ?? "N/A"}
                         </span>
                       </p>
-
-
-
-
                       <div className="flex gap-2">
                         <button
                           className="border text-xs border-gray-300 hover:bg-gray-100 text-black px-2 py-1 rounded"
