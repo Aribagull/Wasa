@@ -22,9 +22,9 @@ export default function ConsumerDetails() {
         const token = localStorage.getItem("token"); 
         const response = await axios.get(
           "https://magneetarsolutions.com/api/consumers",
-          {
-            headers: token ? { Authorization: `Bearer ${token}` } : {},
-          }
+          // {
+          //   headers: token ? { Authorization: `Bearer ${token}` } : {},
+          // }
         );
         setAllConsumers(response.data);
         setDisplayedConsumers(response.data);
