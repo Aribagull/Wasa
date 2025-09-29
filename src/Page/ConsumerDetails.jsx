@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from "react";
-import { getConsumers } from "../API/index.js";
 import ConsumerDetailCards from "./ConsumerCards.jsx";
 import { TbSearch } from "react-icons/tb";
 import { FaUser } from "react-icons/fa";
+import axios from "axios";
 
 export default function ConsumerDetails() {
   const [consumerId, setConsumerId] = useState("");
@@ -15,17 +15,31 @@ export default function ConsumerDetails() {
   const [selectedConsumer, setSelectedConsumer] = useState(null);
   const [searched, setSearched] = useState(false);
 
+  
   useEffect(() => {
-    async function fetchData() {
+    async function fetchConsumers() {
       try {
-        const data = await getConsumers();
-        setAllConsumers(data);
-        setDisplayedConsumers(data);
+        const token = localStorage.getItem("token"); 
+        const response = await axios.get(
+          "https://magneetarsolutions.com/api/consumers",
+          {
+            headers: token ? { Authorization: `Bearer ${token}` } : {},
+          }
+        );
+        setAllConsumers(response.data);
+        setDisplayedConsumers(response.data);
       } catch (err) {
-        console.error("Error:", err);
+        console.error("Error fetching consumers:", err);
+        if (err.response?.status === 401) {
+          console.error("Unauthorized, logging out...");
+          localStorage.removeItem("token");
+          localStorage.removeItem("user_id");
+          localStorage.removeItem("user");
+          window.location.href = "/";
+        }
       }
     }
-    fetchData();
+    fetchConsumers();
   }, []);
 
   const uniqueStatuses = [
