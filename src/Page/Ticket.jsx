@@ -9,6 +9,15 @@ export default function TicketTabs() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
+  // Check for large screen
+  const [isLargeScreen, setIsLargeScreen] = useState(window.innerWidth >= 1536);
+
+  useEffect(() => {
+    const handleResize = () => setIsLargeScreen(window.innerWidth >= 1536);
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
   useEffect(() => {
     const fetchTickets = async () => {
       setLoading(true);
@@ -31,15 +40,13 @@ export default function TicketTabs() {
     fetchTickets();
   }, []);
 
-
   const closedTickets = allTickets
-  .filter((t) => t.status?.toLowerCase() === "approved")
-  .sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+    .filter((t) => t.status?.toLowerCase() === "approved")
+    .sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
 
-const openTickets = allTickets
-  .filter((t) => t.status?.toLowerCase() === "open")
-  .sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
-
+  const openTickets = allTickets
+    .filter((t) => t.status?.toLowerCase() === "open")
+    .sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
 
   const handleUpdate = async (ticketId, status, reason, issue) => {
     if (status === "Approved") {
@@ -50,15 +57,14 @@ const openTickets = allTickets
       }
     }
 
-
     const updated = allTickets.map((t) =>
       t.ticket_id === ticketId
         ? {
-          ...t,
-          status,
-          ...(reason ? { releaseReason: reason } : {}),
-          ...(issue ? { issue } : {}),
-        }
+            ...t,
+            status,
+            ...(reason ? { releaseReason: reason } : {}),
+            ...(issue ? { issue } : {}),
+          }
         : t
     );
     setAllTickets(updated);
@@ -67,22 +73,23 @@ const openTickets = allTickets
 
   return (
     <div className="py-4 px-4">
+      {/* Tabs */}
       <div className="flex gap-4 border-b mb-2">
         <div className="w-1/2 flex gap-4">
           <button
-            className={`pb-2 text-sm ${activeTab === "open"
+            className={`pb-2 ${activeTab === "open"
               ? "border-b-2 border-blue-600 text-blue-600 font-semibold"
               : "text-gray-600"
-              }`}
+              } ${isLargeScreen ? "text-xl" : "text-sm"}`}
             onClick={() => setActiveTab("open")}
           >
             Open Tickets ({openTickets.length})
           </button>
           <button
-            className={`pb-2 text-sm ${activeTab === "closed"
+            className={`pb-2 ${activeTab === "closed"
               ? "border-b-2 border-green-600 text-green-600 font-semibold"
               : "text-gray-600"
-              }`}
+              } ${isLargeScreen ? "text-xl" : "text-sm"}`}
             onClick={() => setActiveTab("closed")}
           >
             Closed Tickets ({closedTickets.length})
@@ -90,15 +97,15 @@ const openTickets = allTickets
         </div>
 
         <div className="w-1/2">
-          <h2 className="pb-2 text-sm border-b-2 border-blue-600 text-blue-600 font-semibold inline-block">
+          <h2 className={`pb-2 border-b-2 border-blue-600 text-blue-600 font-semibold inline-block ${isLargeScreen ? "text-xl" : "text-sm"}`}>
             Ticket Details
           </h2>
         </div>
       </div>
 
       <div className="flex gap-4">
-
-        <div className="bg-white p-4 h-[520px] overflow-y-auto custom-scrollbar w-1/2">
+        {/* Ticket List */}
+        <div className={`bg-white p-4 overflow-y-auto custom-scrollbar ${isLargeScreen ? "h-screen" : "h-[520px]"} ${isLargeScreen ? "text-lg" : "text-sm"} w-1/2`}>
           {loading ? (
             <p className="text-gray-500">Loading tickets...</p>
           ) : error ? (
@@ -110,20 +117,17 @@ const openTickets = allTickets
               <div className="divide-y">
                 {openTickets.map((ticket) => (
                   <div key={ticket.ticket_id} className="px-2 py-3">
-                    <h4 className="text-red-600 text-sm font-semibold uppercase">
+                    <h4 className={`text-red-600 font-semibold uppercase ${isLargeScreen ? "text-xl" : "text-sm"}`}>
                       {ticket.notes || "No reason provided"}
                     </h4>
-                    <p className="text-gray-700 text-sm">
+                    <p className={`${isLargeScreen ? "text-lg" : "text-sm"} text-gray-700`}>
                       Name:{" "}
                       <span className="font-medium">
                         {ticket.temp_consumer?.full_name ?? "N/A"}
                       </span>
                     </p>
                     <div className="flex items-center justify-between">
-
-
-
-                      <p className="text-gray-700 text-sm">
+                      <p className={`${isLargeScreen ? "text-lg" : "text-sm"} text-gray-700`}>
                         Consumer ID:{" "}
                         <span className="font-medium">
                           {ticket.temp_consumer?.temp_consumer_id ?? "N/A"}
@@ -131,12 +135,11 @@ const openTickets = allTickets
                       </p>
                       <div className="flex gap-2">
                         <button
-                          className="border text-xs border-gray-300 hover:bg-gray-100 text-black px-2 py-1 rounded"
+                          className={`${isLargeScreen ? "text-lg px-3 py-2" : "text-xs px-2 py-1"} border border-gray-300 hover:bg-gray-100 text-black rounded`}
                           onClick={() => setSelectedTicket(ticket)}
                         >
                           View Ticket
                         </button>
-
                       </div>
                     </div>
                   </div>
@@ -148,32 +151,23 @@ const openTickets = allTickets
           ) : (
             <div className="divide-y">
               {closedTickets.map((ticket) => (
-                <div
-                  key={ticket.ticket_id}
-                  className="bg-green-50 p-2 py-[15px]"
-                >
-                  <h4 className="text-green-700 text-sm font-semibold">
+                <div key={ticket.ticket_id} className={`bg-green-50 p-2 py-[15px] ${isLargeScreen ? "text-lg" : "text-sm"}`}>
+                  <h4 className="text-green-700 font-semibold">
                     Ticket Approved
                   </h4>
-                  <p className="text-gray-700 text-sm">
-                      Name:{" "}
-                      <span className="font-medium">
-                        {ticket.temp_consumer?.full_name ?? "N/A"}
-                      </span>
-                    </p>
-                  <p className="text-gray-700 text-sm">
-                        Consumer ID:{" "}
-                        <span className="font-medium">
-                          {ticket.temp_consumer?.temp_consumer_id ?? "N/A"}
-                        </span>
-                      </p>
+                  <p>
+                    Name: <span className="font-medium">{ticket.temp_consumer?.full_name ?? "N/A"}</span>
+                  </p>
+                  <p>
+                    Consumer ID: <span className="font-medium">{ticket.temp_consumer?.temp_consumer_id ?? "N/A"}</span>
+                  </p>
                 </div>
               ))}
             </div>
           )}
         </div>
 
-
+        {/* Ticket Modal */}
         <div className="w-1/2">
           {selectedTicket ? (
             <TicketModal
@@ -181,9 +175,10 @@ const openTickets = allTickets
               allTickets={allTickets}
               onClose={() => setSelectedTicket(null)}
               onUpdate={handleUpdate}
+              isLargeScreen={isLargeScreen} // Pass to modal if needed
             />
           ) : (
-            <div className="flex items-center justify-center text-gray-400 h-full">
+            <div className={`flex items-center justify-center text-gray-400 ${isLargeScreen ? "h-screen text-lg" : "h-full text-sm"}`}>
               Select a ticket to see details
             </div>
           )}

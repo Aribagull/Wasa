@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react"; 
-import { createSupervisor } from "../API/index.js";
+import { createSupervisor, getSurveyors } from "../API/index.js";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
 
 export default function CreateUserModal({ isModalOpen, setIsModalOpen, setUsers, role }) {
@@ -7,6 +7,7 @@ export default function CreateUserModal({ isModalOpen, setIsModalOpen, setUsers,
   const [toastMessage, setToastMessage] = useState(""); 
   const [toastType, setToastType] = useState("success"); 
   const [showPassword, setShowPassword] = useState(false);
+  const [isLargeScreen, setIsLargeScreen] = useState(window.innerWidth >= 1536); 
 
   const [newUser, setNewUser] = useState({
     username: "",
@@ -19,6 +20,13 @@ export default function CreateUserModal({ isModalOpen, setIsModalOpen, setUsers,
       ? "9a9a41ca-4d6d-4827-949c-3f14f22c6aa5" 
       : "882e8ff3-8062-443d-9ea5-09649a0d79b1",
   });
+
+
+  useEffect(() => {
+    const handleResize = () => setIsLargeScreen(window.innerWidth >= 1536);
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
 
   const isEmailValid = (email) => /\S+@\S+\.\S+/.test(email);
   const isPhoneValid = (phone) => /^\d{11}$/.test(phone);
@@ -34,47 +42,38 @@ export default function CreateUserModal({ isModalOpen, setIsModalOpen, setUsers,
       setToastType("error");
       return;
     }
-
     setLoading(true);
-    try {
-      const response = await createSupervisor(newUser);
-      console.log("API Response:", response);
+     try {
+    const response = await createSupervisor(newUser);
+    const { data, status } = response;
+    if (data.success && (status === 200 || status === 201)) {
+  setUsers({
+    id: data.user_id,
+    username: newUser.username,
+    full_name: newUser.full_name,
+    email: newUser.email,
+    phone: newUser.phone,
+    status: newUser.status,
+    role_id: newUser.role_id,
+    created_at: new Date().toISOString(), 
+  });
 
-      const { data, status } = response;
-
-      if (data.success && (status === 200 || status === 201)) {
-        const newCreatedUser = {
-          ...newUser,
-          id: data.user_id,
-        };
-
-        setUsers((prev) => [...prev, newCreatedUser]);
-        setToastMessage(`${role.charAt(0).toUpperCase() + role.slice(1)} created successfully!`);
-        setToastType("success");
-
-        setNewUser({
-          username: "",
-          email: "",
-          password: "",
-          full_name: "",
-          phone: "",
-          status: "active",
-          role_id: newUser.role_id,
-        });
-
-        setIsModalOpen(false);
-      } else {
-        setToastMessage(data.message || "User creation failed.");
-        setToastType("error");
-      }
-    } catch (error) {
-      console.error("Create User Error:", error);
-      setToastMessage("Network error while creating user.");
+  setToastMessage(`${role.charAt(0).toUpperCase() + role.slice(1)} created successfully!`);
+  setToastType("success");
+  setNewUser({ username: "", email: "", password: "", full_name: "", phone: "", status: "active", role_id: newUser.role_id });
+  setIsModalOpen(false);
+} else {
+      setToastMessage(data.message || "User creation failed.");
       setToastType("error");
-    } finally {
-      setLoading(false);
     }
-  };
+  } catch (error) {
+    console.error("Create User Error:", error);
+    setToastMessage("Network error while creating user.");
+    setToastType("error");
+  } finally {
+    setLoading(false);
+  }
+};
 
   useEffect(() => {
     if (toastMessage) {
@@ -86,78 +85,92 @@ export default function CreateUserModal({ isModalOpen, setIsModalOpen, setUsers,
   return (
     <>
       {isModalOpen && (
-        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-30 z-50">
-          <div className="bg-white p-6 rounded shadow-lg w-[500px] max-w-full relative">
+        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-30 z-50"
+         onClick={() => setIsModalOpen(false)}
+         >
+          
+          <div
+            className={`bg-white rounded shadow-lg relative max-w-full ${
+              isLargeScreen ? "w-[800px] p-10" : "w-[500px] p-6"
+            }`}
+             onClick={(e) => e.stopPropagation()}
+          >
             <button
               onClick={() => setIsModalOpen(false)}
-              className="absolute top-2 right-2 text-gray-500 hover:text-gray-800 text-lg font-bold"
+              className={`absolute top-2 right-2 font-bold text-gray-500 hover:text-gray-800 ${
+                isLargeScreen ? "text-2xl" : "text-lg"
+              }`}
             >
               ×
             </button>
 
-            <h3 className="text-lg font-semibold mb-4">Create {role.charAt(0).toUpperCase() + role.slice(1)}</h3>
+            <h3 className={`mb-4 font-semibold ${isLargeScreen ? "text-2xl" : "text-lg"}`}>
+              Create {role.charAt(0).toUpperCase() + role.slice(1)}
+            </h3>
 
-            <div className="grid grid-cols-2 gap-4 mb-4">
+            <div className={`grid grid-cols-2 gap-4 mb-4 ${isLargeScreen ? "gap-6" : ""}`}>
               <div>
-                <label className="block text-sm font-medium mb-1">Username</label>
+                <label className={`block mb-1 font-medium ${isLargeScreen ? "text-lg" : "text-sm"}`}>Username</label>
                 <input
                   type="text"
                   placeholder="surveyor01"
                   value={newUser.username}
                   onChange={(e) => setNewUser({ ...newUser, username: e.target.value })}
-                  className="border px-3 py-1 rounded w-full focus:border-blue-500 focus:outline-none focus:ring-0 text-sm"
+                  className={`border rounded w-full px-3 ${isLargeScreen ? "py-3 text-lg" : "py-1 text-sm"} focus:outline-none focus:border-blue-500`}
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium mb-1">Full Name</label>
+                <label className={`block mb-1 font-medium ${isLargeScreen ? "text-lg" : "text-sm"}`}>Full Name</label>
                 <input
                   type="text"
                   placeholder="John Doe"
                   value={newUser.full_name}
                   onChange={(e) => setNewUser({ ...newUser, full_name: e.target.value })}
-                  className="border px-3 py-1 rounded w-full focus:border-blue-500 focus:outline-none text-sm focus:ring-0"
+                  className={`border rounded w-full px-3 ${isLargeScreen ? "py-3 text-lg" : "py-1 text-sm"} focus:outline-none focus:border-blue-500`}
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium mb-1">Phone</label>
+                <label className={`block mb-1 font-medium ${isLargeScreen ? "text-lg" : "text-sm"}`}>Phone</label>
                 <input
                   type="text"
                   placeholder="03001234567"
                   value={newUser.phone}
                   onChange={(e) => setNewUser({ ...newUser, phone: e.target.value })}
-                  className={`border px-3 py-1 rounded w-full focus:outline-none focus:ring-0 text-sm ${
+                  className={`border rounded w-full px-3 ${isLargeScreen ? "py-3 text-lg" : "py-1 text-sm"} focus:outline-none ${
                     newUser.phone && !isPhoneValid(newUser.phone) ? "border-red-500" : "focus:border-blue-500"
                   }`}
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium mb-1">Email</label>
+                <label className={`block mb-1 font-medium ${isLargeScreen ? "text-lg" : "text-sm"}`}>Email</label>
                 <input
                   type="email"
                   placeholder="example@gmail.com"
                   value={newUser.email}
                   onChange={(e) => setNewUser({ ...newUser, email: e.target.value })}
-                  className={`border px-3 py-1 rounded w-full focus:outline-none text-sm focus:ring-0 ${
+                  className={`border rounded w-full px-3 ${isLargeScreen ? "py-3 text-lg" : "py-1 text-sm"} focus:outline-none ${
                     newUser.email && !isEmailValid(newUser.email) ? "border-red-500" : "focus:border-blue-500"
                   }`}
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium mb-1">Password</label>
+                <label className={`block mb-1 font-medium ${isLargeScreen ? "text-lg" : "text-sm"}`}>Password</label>
                 <div className="relative">
                   <input
                     type={showPassword ? "text" : "password"}
                     placeholder="Enter a strong password"
                     value={newUser.password}
                     onChange={(e) => setNewUser({ ...newUser, password: e.target.value })}
-                    className="border px-3 py-1 rounded w-full focus:border-blue-500 text-sm focus:outline-none focus:ring-0"
+                    className={`border rounded w-full px-3 ${isLargeScreen ? "py-3 text-lg" : "py-1 text-sm"} focus:outline-none focus:border-blue-500`}
                   />
                   <span
-                    className="absolute right-2 top-1/2 transform -translate-y-1/2 cursor-pointer text-gray-500"
+                    className={`absolute right-2 top-1/2 transform -translate-y-1/2 cursor-pointer text-gray-500 ${
+                      isLargeScreen ? "text-xl" : "text-base"
+                    }`}
                     onClick={() => setShowPassword(!showPassword)}
                   >
                     {showPassword ? <FaEyeSlash /> : <FaEye />}
@@ -166,11 +179,11 @@ export default function CreateUserModal({ isModalOpen, setIsModalOpen, setUsers,
               </div>
 
               <div>
-                <label className="block text-sm font-medium mb-1">Status</label>
+                <label className={`block mb-1 font-medium ${isLargeScreen ? "text-lg" : "text-sm"}`}>Status</label>
                 <select
                   value={newUser.status}
                   onChange={(e) => setNewUser({ ...newUser, status: e.target.value })}
-                  className="border px-3 py-1 rounded w-full focus:border-blue-500 focus:outline-none text-sm focus:ring-0"
+                  className={`border rounded w-full px-3 ${isLargeScreen ? "py-3 text-lg" : "py-1 text-sm"} focus:outline-none focus:border-blue-500`}
                 >
                   <option value="active">Active</option>
                   <option value="inactive">Inactive</option>
@@ -178,17 +191,17 @@ export default function CreateUserModal({ isModalOpen, setIsModalOpen, setUsers,
               </div>
             </div>
 
-            <div className="flex justify-between gap-2">
+            <div className={`flex justify-between gap-2 ${isLargeScreen ? "mt-6" : ""}`}>
               <button
                 onClick={() => setIsModalOpen(false)}
-                className="px-4 py-2 rounded bg-gray-200 hover:bg-gray-300"
+                className={`px-4 rounded ${isLargeScreen ? "py-3 text-lg" : "py-2 text-sm"} bg-gray-200 hover:bg-gray-300`}
                 disabled={loading}
               >
                 Cancel
               </button>
               <button
                 onClick={handleCreate}
-                className={`px-4 py-2 rounded text-white ${
+                className={`px-4 rounded ${isLargeScreen ? "py-3 text-lg" : "py-2 text-sm"} text-white ${
                   isFormValid() ? "bg-blue-600 hover:bg-blue-700" : "bg-gray-400 cursor-not-allowed"
                 }`}
                 disabled={loading || !isFormValid()}
@@ -201,7 +214,7 @@ export default function CreateUserModal({ isModalOpen, setIsModalOpen, setUsers,
               <div
                 className={`fixed top-5 right-5 px-4 py-2 rounded shadow-lg text-white ${
                   toastType === "success" ? "bg-green-500" : "bg-red-500"
-                }`}
+                } ${isLargeScreen ? "text-lg" : "text-sm"}`}
               >
                 {toastMessage}
               </div>

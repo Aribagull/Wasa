@@ -14,6 +14,16 @@ export default function SurveyDetails() {
   const [selectedRow, setSelectedRow] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [toast, setToast] = useState("");
+  const [isLargeScreen, setIsLargeScreen] = useState(window.innerWidth >= 1536);
+
+  // Detect window resize
+  useEffect(() => {
+    const handleResize = () => {
+      setIsLargeScreen(window.innerWidth >= 1536);
+    };
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
 
   const handleFilterChange = (e) => {
     const { name, value } = e.target;
@@ -46,28 +56,38 @@ export default function SurveyDetails() {
         const res = await getAllSurveys();
         const data = res?.data || [];
 
-        const mappedData = data.map((entry, i) => {
-          const consumer = entry?.consumer || {};
-          const property = entry?.property || {};
-          const connection = entry?.connection || {};
-          const survey = entry?.survey || {};
+        const mappedData = data
+          .map((entry, i) => {
+            const consumer = entry?.consumer || {};
+            const property = entry?.property || {};
+            const connection = entry?.connection || {};
+            const survey = entry?.survey || {};
 
-          return {
-            cid: consumer.consumer_code || connection.consumer_id || "N/A",
-            name: consumer.full_name || "N/A",
-            cnic: consumer.cnic || "N/A",
-            uc: property.uc || survey.uc || "N/A",
-            status: property.status || connection.connection_status || "N/A",
-            zone: property.zone || survey.zone || "N/A",
-            category: property.category || "N/A",
-            ward: property.ward || survey.ward || "N/A",
-            water_unit: connection.water_unit || "N/A",
-            index: i,
-            fullData: entry,
-            releaseReason: "",
-          };
-        })
+            return {
+              cid: consumer.consumer_code || connection.consumer_id || "N/A",
+              name: consumer.full_name || "N/A",
+              cnic: consumer.cnic || "N/A",
+              uc: property.uc || survey.uc || "N/A",
+              status: property.status || connection.connection_status || "N/A",
+              zone: property.zone || survey.zone || "N/A",
+              category: property.category || "N/A",
+              ward: property.ward || survey.ward || "N/A",
+              water_unit: connection.water_unit || "N/A",
+              index: i,
+              fullData: entry,
+              releaseReason: "",
+              surveyedAt: survey.surveyed_at || entry.created_at || null, // ✅ added timestamp
+            };
+          })
           .filter((row) => row.name !== "N/A" && row.cnic !== "N/A");
+
+        // ✅ Sort latest survey first
+        mappedData.sort((a, b) => {
+          if (!a.surveyedAt) return 1;
+          if (!b.surveyedAt) return -1;
+          return new Date(b.surveyedAt) - new Date(a.surveyedAt);
+        });
+
         setTableData(mappedData);
       } catch (error) {
         console.error(error);
@@ -84,6 +104,8 @@ export default function SurveyDetails() {
       $table.DataTable().destroy();
     }
 
+    const pageLength = isLargeScreen ? 25 : 10;
+
     tableInstance.current = $table.DataTable({
       data: tableData,
       columns: [
@@ -98,14 +120,18 @@ export default function SurveyDetails() {
         { title: "Ward", data: "ward" },
         { title: "Water Unit", data: "water_unit" },
         {
+          title: "Surveyed At", // ✅ added column
+          data: "surveyedAt",
+          render: (data) => (data ? new Date(data).toLocaleString() : "N/A"),
+        },
+        {
           title: "Action",
           data: "index",
           orderable: false,
           render: (data, type, row) =>
             `<button class="view-btn text-black hover:text-blue-800" data-cid="${row.cid}">
-      <i class="fa-regular fa-eye" style="font-size: 10px;"></i>
-  </button>`
-
+              <i class="fa-regular fa-eye" style="font-size: ${isLargeScreen ? '18px' : '10px'};"></i>
+            </button>`
         },
       ],
       paging: true,
@@ -113,7 +139,12 @@ export default function SurveyDetails() {
       ordering: true,
       info: true,
       lengthChange: false,
-      pageLength: 10
+      pageLength: pageLength,
+      createdRow: function (row) {
+        if (isLargeScreen) {
+          $(row).css("font-size", "1.125rem"); // Large screen text bigger
+        }
+      },
     });
 
     $table.on("click", ".view-btn", function () {
@@ -123,11 +154,10 @@ export default function SurveyDetails() {
       setIsModalOpen(true);
     });
 
-
     return () => {
       $table.off("click", ".view-btn");
     };
-  }, [tableData]);
+  }, [tableData, isLargeScreen]);
 
   const handleUpdateStatus = (id, newStatus, reason, resultData, toastMessage) => {
     setTableData((prev) => {
@@ -174,23 +204,43 @@ export default function SurveyDetails() {
   return (
     <div className="px-4 py-2">
       <div className="flex flex-wrap gap-4">
-        <select name="category" value={filters.category} onChange={handleFilterChange} className="border rounded px-3 py-1 text-sm bg-transparent">
+        <select
+          name="category"
+          value={filters.category}
+          onChange={handleFilterChange}
+          className={`border rounded px-3 py-1 text-sm bg-transparent ${isLargeScreen ? "text-lg 2xl:text-xl" : ""}`}
+        >
           <option value="">Category</option>
           {[...new Set(tableData.map((d) => d.category))].sort().map((val) => <option key={val} value={val}>{val}</option>)}
         </select>
-        <select name="status" value={filters.status} onChange={handleFilterChange} className="border rounded px-3 py-1 text-sm bg-transparent">
+        <select
+          name="status"
+          value={filters.status}
+          onChange={handleFilterChange}
+          className={`border rounded px-3 py-1 text-sm bg-transparent ${isLargeScreen ? "text-lg 2xl:text-xl" : ""}`}
+        >
           <option value="">Status</option>
           {[...new Set(tableData.map((d) => d.status))].sort().map((val) => <option key={val} value={val}>{val}</option>)}
         </select>
-        <select name="ward" value={filters.ward} onChange={handleFilterChange} className="border rounded px-3 py-1 text-sm bg-transparent">
+        <select
+          name="ward"
+          value={filters.ward}
+          onChange={handleFilterChange}
+          className={`border rounded px-3 py-1 text-sm bg-transparent ${isLargeScreen ? "text-lg 2xl:text-xl" : ""}`}
+        >
           <option value="">Ward No</option>
           {[...new Set(tableData.map((d) => d.ward))].sort((a, b) => a - b).map((val) => <option key={val} value={val}>{val}</option>)}
         </select>
-        <button onClick={handleClearFilters} className="text-blue-600 py-1 rounded text-sm hover:text-blue-800">Clear Filters</button>
+        <button
+          onClick={handleClearFilters}
+          className={`text-blue-600 py-1 rounded text-sm hover:text-blue-800 ${isLargeScreen ? "text-lg 2xl:text-xl" : ""}`}
+        >
+          Clear Filters
+        </button>
       </div>
 
       <div className="overflow-x-auto mt-4">
-        <table ref={tableRef} className="display w-full text-sm text-gray-700"></table>
+        <table ref={tableRef} className={`display w-full text-sm text-gray-700 ${isLargeScreen ? "text-lg 2xl:text-xl" : ""}`}></table>
       </div>
 
       <ApprovalAction
@@ -200,9 +250,8 @@ export default function SurveyDetails() {
         onUpdateStatus={handleUpdateStatus}
       />
 
-
       {toast && (
-        <div className="fixed top-5 right-5 bg-green-100 text-black text-sm px-4 py-2 rounded shadow-lg animate-slide-in">
+        <div className={`fixed top-5 right-5 bg-green-100 text-black text-sm px-4 py-2 rounded shadow-lg animate-slide-in ${isLargeScreen ? "text-lg 2xl:text-xl" : ""}`}>
           {toast}
         </div>
       )}

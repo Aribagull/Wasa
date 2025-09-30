@@ -29,18 +29,17 @@ export default function TicketUserInfo({ filter, ticket }) {
         if (res.success && res.data) {
           const data = res.data.data;
 
-         setNewData({
-  consumer: data.temp_consumer || {},
-  connection: data.temp_connection || {},
-  property: data.temp_property || {},
-});
+          setNewData({
+            consumer: data.temp_consumer || {},
+            connection: data.temp_connection || {},
+            property: data.temp_property || {},
+          });
 
-setOldData({
-  consumer: data.consumer || {},
-  connection: data.connection || {},
-  property: data.property || {},
-});
-
+          setOldData({
+            consumer: data.consumer || {},
+            connection: data.connection || {},
+            property: data.property || {},
+          });
         } else {
           setError(res.error || "Failed to fetch data.");
         }
@@ -53,7 +52,6 @@ setOldData({
 
     fetchData();
   }, [ticket]);
-
 
   const renderSection = (sectionName, obj) => {
     if (!obj || Object.keys(obj).length === 0) return null;
@@ -83,10 +81,10 @@ setOldData({
           <div className="grid grid-cols-2 gap-4 flex-1">
             {fields.map(([key, value]) => (
               <div key={key}>
-                <p className="text-xs font-semibold capitalize">
+                <p className="text-xs 2xl:text-lg font-semibold capitalize">
                   {key.replace(/_/g, " ")}
                 </p>
-                <p className="text-xs text-gray-600">
+                <p className="text-xs 2xl:text-lg text-gray-600">
                   {value !== null && value !== "" ? String(value) : "N/A"}
                 </p>
               </div>
@@ -97,7 +95,7 @@ setOldData({
             <div className="grid grid-cols-2 gap-2 mt-3">
               {propertyImages.map((url, index) => (
                 <div key={index}>
-                  <p className="text-[10px] font-semibold text-gray-600 capitalize mb-1">
+                  <p className="text-[10px] 2xl:text-base font-semibold text-gray-600 capitalize mb-1">
                     image {index + 1}
                   </p>
                   <img
@@ -127,10 +125,10 @@ setOldData({
           <div className="grid grid-cols-2 gap-4 flex-1">
             {fields.map(([key, value]) => (
               <div key={key}>
-                <p className="text-xs font-semibold capitalize">
+                <p className="text-xs 2xl:text-lg font-semibold capitalize">
                   {key.replace(/_/g, " ")}
                 </p>
-                <p className="text-xs text-gray-600">
+                <p className="text-xs 2xl:text-lg text-gray-600">
                   {value !== null && value !== "" ? String(value) : "N/A"}
                 </p>
               </div>
@@ -141,7 +139,7 @@ setOldData({
             <div className="w-40 flex flex-col gap-2">
               {images.map(([key, value]) => (
                 <div key={key}>
-                  <p className="text-[10px] font-semibold text-gray-600 capitalize mb-1">
+                  <p className="text-[10px] 2xl:text-base font-semibold text-gray-600 capitalize mb-1">
                     {key.replace(/_/g, " ")}
                   </p>
                   <img
@@ -161,91 +159,95 @@ setOldData({
 
   const renderGrid = (data) => {
     if (!data)
-      return <p className="text-xs text-gray-400">No data available</p>;
+      return <p className="text-xs 2xl:text-lg text-gray-400">No data available</p>;
 
     return (
       <div className="grid grid-cols-3 gap-4">
         <div className="p-2 border rounded">
-          <h5 className="font-bold text-sm mb-2 uppercase text-blue-600 pb-2">Consumer</h5>
+          <h5 className="font-bold text-sm 2xl:text-2xl mb-2 uppercase text-blue-600 pb-2">
+            Consumer
+          </h5>
           {renderSection("consumer", data.consumer)}
         </div>
 
         <div className="p-2 border rounded">
-          <h5 className="font-bold text-sm mb-2 uppercase text-blue-600 pb-2">Connection</h5>
+          <h5 className="font-bold text-sm 2xl:text-2xl mb-2 uppercase text-blue-600 pb-2">
+            Connection
+          </h5>
           {renderSection("connection", data.connection)}
         </div>
 
         <div className="p-2 border rounded">
-          <h5 className="font-bold text-sm mb-2 uppercase text-blue-600 pb-2">Property</h5>
+          <h5 className="font-bold text-sm 2xl:text-2xl mb-2 uppercase text-blue-600 pb-2">
+            Property
+          </h5>
           {renderSection("property", data.property)}
         </div>
       </div>
     );
   };
 
-const renderSplitGrid = (newData, oldData) => {
-  if (!newData && !oldData)
-    return <p className="text-xs text-gray-400">No data available</p>;
+  const renderSplitGrid = (newData, oldData) => {
+    if (!newData && !oldData)
+      return <p className="text-xs 2xl:text-lg text-gray-400">No data available</p>;
 
-  return (
-    <div>
-       <div className="grid grid-cols-2 font-semibold text-center text-sm uppercase">
-        <div className="p-2 border-gray-300">New Data</div>
-        <div className="p-2">Old Data</div>
+    return (
+      <div>
+        <div className="grid grid-cols-2 font-semibold text-center text-sm 2xl:text-2xl uppercase">
+          <div className="p-2 border-gray-300">New Data</div>
+          <div className="p-2">Old Data</div>
+        </div>
+
+        <div className="grid grid-cols-2">
+          <div className="p-2 px-10 bg-[#d7dbfd44]">
+            <h5 className="font-semibold text-sm 2xl:text-2xl mb-2 pt-4 text-blue-500 uppercase">
+              New Consumer
+            </h5>
+            {renderSection("consumer", newData?.consumer)}
+          </div>
+          <div className="p-2 px-10 bg-gray-50 border-l border-[#46464644]">
+            <h5 className="font-semibold text-sm 2xl:text-2xl mb-2 pt-4 text-green-600 uppercase">
+              Old Consumer
+            </h5>
+            {renderSection("consumer", oldData?.consumer)}
+          </div>
+        </div>
+
+        <div className="grid grid-cols-2">
+          <div className="p-2 px-10 bg-[#d7dbfd44]">
+            <h5 className="font-semibold text-sm 2xl:text-2xl mb-2 text-blue-500 uppercase">
+              New Connection
+            </h5>
+            {renderSection("connection", newData?.connection)}
+          </div>
+          <div className="p-2 px-10 bg-gray-50 border-l border-[#46464644]">
+            <h5 className="font-semibold text-sm 2xl:text-2xl mb-2 text-green-600 uppercase">
+              Old Connection
+            </h5>
+            {renderSection("connection", oldData?.connection)}
+          </div>
+        </div>
+
+        <div className="grid grid-cols-2">
+          <div className="p-2 px-10 bg-[#d7dbfd44]">
+            <h5 className="font-semibold text-sm 2xl:text-2xl mb-2 text-blue-500 uppercase">
+              New Property
+            </h5>
+            {renderSection("property", newData?.property)}
+          </div>
+          <div className="p-2 px-10 bg-gray-50 border-l border-[#46464644]">
+            <h5 className="font-semibold text-sm 2xl:text-2xl mb-2 text-green-600 uppercase">
+              Old Property
+            </h5>
+            {renderSection("property", oldData?.property)}
+          </div>
+        </div>
       </div>
-      <div className="grid grid-cols-2">
-        <div className="p-2 px-10 bg-[#d7dbfd44]">
-          <h5 className="font-semibold text-sm mb-2 pt-4 text-blue-500 uppercase">
-            New Consumer
-          </h5>
-          {renderSection("consumer", newData?.consumer)}
-        </div>
-        <div className="p-2 px-10 bg-gray-50 border-l border-[#46464644]">
-          <h5 className="font-semibold text-sm mb-2 pt-4 text-green-600 uppercase">
-            Old Consumer
-          </h5>
-          {renderSection("consumer", oldData?.consumer)}
-        </div>
-      </div>
+    );
+  };
 
- 
-      <div className="grid grid-cols-2">
-        <div className="p-2 px-10 bg-[#d7dbfd44]">
-          <h5 className="font-semibold text-sm mb-2 text-blue-500 uppercase">
-            New Connection
-          </h5>
-          {renderSection("connection", newData?.connection)}
-        </div>
-        <div className="p-2 px-10 bg-gray-50 border-l border-[#46464644]">
-          <h5 className="font-semibold text-sm mb-2 text-green-600 uppercase">
-            Old Connection
-          </h5>
-          {renderSection("connection", oldData?.connection)}
-        </div>
-      </div>
-
-   
-      <div className="grid grid-cols-2">
-        <div className="p-2 px-10 bg-[#d7dbfd44]">
-          <h5 className="font-semibold text-sm mb-2 text-blue-500 uppercase">
-            New Property
-          </h5>
-          {renderSection("property", newData?.property)}
-        </div>
-        <div className="p-2 px-10 bg-gray-50 border-l border-[#46464644]">
-          <h5 className="font-semibold text-sm mb-2 text-green-600 uppercase">
-            Old Property
-          </h5>
-          {renderSection("property", oldData?.property)}
-        </div>
-      </div>
-    </div>
-  );
-};
-
-
-  if (loading) return <p className="text-sm text-gray-500"></p>;
-  if (error) return <p className="text-sm text-red-500">{error}</p>;
+  if (loading) return <p className="text-sm 2xl:text-lg text-gray-500"></p>;
+  if (error) return <p className="text-sm 2xl:text-lg text-red-500">{error}</p>;
 
   return (
     <>
@@ -260,9 +262,7 @@ const renderSplitGrid = (newData, oldData) => {
         </div>
       )}
       {filter === "split" && (
-        <div className="p-4 custom-scrollbar">
-          {renderSplitGrid(newData, oldData)}
-        </div>
+        <div className="p-4 custom-scrollbar">{renderSplitGrid(newData, oldData)}</div>
       )}
 
       {selectedImage && (

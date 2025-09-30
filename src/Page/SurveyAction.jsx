@@ -11,6 +11,14 @@ export default function ApprovalAction({ isOpen, onClose, row, onUpdateStatus })
   const [popupMessage, setPopupMessage] = useState("");
   const [popupType, setPopupType] = useState(""); 
 
+  const [isLargeScreen, setIsLargeScreen] = useState(window.innerWidth >= 1536);
+
+  useEffect(() => {
+    const handleResize = () => setIsLargeScreen(window.innerWidth >= 1536);
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
   useEffect(() => {
     if (isOpen && row) {
       setShowModal(true);
@@ -35,8 +43,6 @@ export default function ApprovalAction({ isOpen, onClose, row, onUpdateStatus })
     survey_status,
     survey_type,
     remarks,
-    supervisor = {},
-    surveyor = {},
   } = row;
 
   const survey_id = row.survey_id || row.survey?.survey_id;
@@ -50,8 +56,10 @@ export default function ApprovalAction({ isOpen, onClose, row, onUpdateStatus })
 
     return orderedEntries.map(([key, value]) => (
       <div key={key}>
-        <p className="text-gray-500 capitalize">{key.replace(/_/g, " ")}</p>
-        <p>{String(value)}</p>
+        <p className={`${isLargeScreen ? "text-lg" : "text-xs"} text-gray-500 capitalize`}>
+          {key.replace(/_/g, " ")}
+        </p>
+        <p className={`${isLargeScreen ? "text-xl" : "text-xs"}`}>{String(value)}</p>
       </div>
     ));
   };
@@ -106,46 +114,44 @@ export default function ApprovalAction({ isOpen, onClose, row, onUpdateStatus })
       onClick={onClose}
     >
       <div
-        className={`bg-white w-full max-w-xl h-full overflow-y-auto px-5 transform transition-transform duration-300 ease-in-out ${
+        className={`bg-white w-full ${isLargeScreen ? "max-w-4xl" : "max-w-xl"} h-full overflow-y-auto px-5 transform transition-transform duration-300 ease-in-out ${
           animateIn ? "translate-x-0" : "translate-x-full"
         }`}
         onClick={(e) => e.stopPropagation()}
       >
 
         <div className="flex justify-between items-center px-2 py-3 border-b">
-          <h2 className="text-lg font-semibold text-[#1e1e60] flex items-center gap-3">
-            <BiSolidUserDetail size={28} /> WASA Customer Details
+          <h2 className={`font-semibold text-[#1e1e60] flex items-center gap-3 ${isLargeScreen ? "text-3xl" : "text-lg"}`}>
+            <BiSolidUserDetail size={isLargeScreen ? 36 : 28} /> WASA Customer Details
           </h2>
-          <button onClick={onClose} className="text-gray-500 hover:text-gray-700">
+          <button onClick={onClose} className={`text-gray-500 hover:text-gray-700 ${isLargeScreen ? "text-2xl" : "text-base"}`}>
             ✕
           </button>
         </div>
 
-        <div className="flex items-center justify-between px-2 py-3 border-b">
+        <div className={`flex items-center justify-between px-2 py-3 border-b ${isLargeScreen ? "text-lg" : "text-xs"}`}>
           <div className="flex items-center gap-4">
             <div>
-              <p className="text-sm font-semibold text-gray-800">{consumer.full_name}</p>
-              <p className="text-xs text-gray-500">{consumer.email}</p>
+              <p className={`font-semibold text-gray-800 ${isLargeScreen ? "text-xl" : "text-sm"}`}>{consumer.full_name}</p>
+              <p className={`${isLargeScreen ? "text-lg" : "text-xs"} text-gray-500`}>{consumer.email}</p>
             </div>
           </div>
           <div className="text-right">
-            <p className="text-xs text-gray-500 mb-1">
+            <p className={`${isLargeScreen ? "text-lg" : "text-xs"} mb-1`}>
               Category: <span className="ml-2 text-black">{property.category || ""}</span>
             </p>
-            <p className="text-xs text-gray-500">
+            <p className={`${isLargeScreen ? "text-lg" : "text-xs"}`}>
               Status: <span className="ml-8 text-black">{property.status || "N/A"}</span>
             </p>
           </div>
         </div>
 
-        <div className="flex justify-around border-b px-4 py-3 text-sm font-medium bg-gray-50 mt-3">
+        <div className={`flex justify-around border-b px-4 py-3 font-medium bg-gray-50 mt-3 ${isLargeScreen ? "text-xl" : "text-sm"}`}>
           {["consumer", "property", "connection", "survey"].map((tab) => (
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
-              className={`px-3 py-4 rounded ${
-                activeTab === tab ? "bg-blue-600 text-white" : "text-gray-700"
-              }`}
+              className={`px-3 py-4 rounded ${activeTab === tab ? "bg-blue-600 text-white" : "text-gray-700"} ${isLargeScreen ? "text-lg" : ""}`}
             >
               {tab.charAt(0).toUpperCase() + tab.slice(1)} Info
             </button>
@@ -153,22 +159,22 @@ export default function ApprovalAction({ isOpen, onClose, row, onUpdateStatus })
         </div>
 
         {activeTab === "consumer" && (
-          <div className="p-4 grid grid-cols-3 gap-4 text-xs">
+          <div className={`p-4 grid grid-cols-3 gap-4 ${isLargeScreen ? "text-lg" : "text-xs"}`}>
             {renderFields(consumer, ["full_name", "email", "phone_number", "type"])}
           </div>
         )}
         {activeTab === "property" && (
-          <div className="p-4 grid grid-cols-3 gap-4 text-xs">
+          <div className={`p-4 grid grid-cols-3 gap-4 ${isLargeScreen ? "text-lg" : "text-xs"}`}>
             {renderFields(property, ["address", "city", "category", "status"])}
           </div>
         )}
         {activeTab === "connection" && (
-          <div className="p-4 grid grid-cols-3 gap-4 text-xs">
+          <div className={`p-4 grid grid-cols-3 gap-4 ${isLargeScreen ? "text-lg" : "text-xs"}`}>
             {renderFields(connection, ["connection_id", "connection_status", "created_at"])}
           </div>
         )}
         {activeTab === "survey" && (
-          <div className="p-4 grid grid-cols-3 gap-4 text-xs">
+          <div className={`p-4 grid grid-cols-3 gap-4 ${isLargeScreen ? "text-lg" : "text-xs"}`}>
             <div>
               <p className="text-gray-500">Survey ID</p>
               <p>{survey_id}</p>
@@ -190,12 +196,12 @@ export default function ApprovalAction({ isOpen, onClose, row, onUpdateStatus })
 
         {showReasonBox && (
           <div className="px-6 py-4 bg-red-50">
-            <label className="block text-xs font-medium text-red-800 mb-1">
+            <label className={`block font-medium mb-1 ${isLargeScreen ? "text-lg" : "text-xs"} text-red-800`}>
               Reason for Release Ticket
             </label>
             <textarea
               rows={3}
-              className="w-full border border-red-300 rounded px-3 py-2 text-xs focus:border-black focus:outline-none resize-none"
+              className={`w-full border border-red-300 rounded px-3 py-2 focus:border-black focus:outline-none resize-none ${isLargeScreen ? "text-lg" : "text-xs"}`}
               placeholder="Enter reason here..."
               value={rejectionReason}
               onChange={(e) => setRejectionReason(e.target.value)}
@@ -203,25 +209,28 @@ export default function ApprovalAction({ isOpen, onClose, row, onUpdateStatus })
           </div>
         )}
 
+     
         <div className="flex justify-between items-center px-6 py-4">
           <button
             onClick={handleRelease}
-            className="px-4 py-2 border rounded hover:bg-black hover:text-white text-gray-700 text-xs"
+            className={`px-4 py-2 border rounded hover:bg-black hover:text-white text-gray-700 ${isLargeScreen ? "text-lg" : "text-xs"}`}
           >
             Release Ticket
           </button>
           <button
             onClick={handleApprove}
-            className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-gray-800 text-xs"
+            className={`px-4 py-2 bg-blue-600 text-white rounded hover:bg-gray-800 ${isLargeScreen ? "text-lg" : "text-xs"}`}
           >
             Approve
           </button>
         </div>
 
+       
         {popupMessage && (
           <div
-            className={`fixed top-5 right-5 px-4 py-2 rounded shadow-md text-white text-sm transition-all duration-300
-            ${popupType === "success" ? "bg-green-500" : "bg-red-500"}`}
+            className={`fixed top-5 right-5 px-4 py-2 rounded shadow-md text-white transition-all duration-300 ${
+              popupType === "success" ? "bg-green-500" : "bg-red-500"
+            } ${isLargeScreen ? "text-lg" : "text-sm"}`}
           >
             {popupMessage}
           </div>

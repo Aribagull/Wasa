@@ -7,6 +7,9 @@ module.exports = {
         lightBlue: '#F1F8FE',
         DarkBlue: '#0c2534',
       },
+      screens: {
+        '3xl': '1920px', 
+      },
       fontFamily: {
         heading: ['Playfair Display', 'serif'], 
         body: ['Open Sans', 'sans-serif'], 

@@ -13,17 +13,17 @@ export default function ConsumerDetailCards({ consumer }) {
     );
   };
 
-
-  const formatKey = (key) => key.replace(/_/g, " ").replace(/\b\w/g, (l) => l.toUpperCase());
-
+  const formatKey = (key) =>
+    key.replace(/_/g, " ").replace(/\b\w/g, (l) => l.toUpperCase());
 
   const renderKeyValue = (obj) => {
     return Object.entries(obj).map(([key, value]) => {
-      if (Array.isArray(value) || typeof value === "object" || value === null) return null; // skip nested
+      if (Array.isArray(value) || typeof value === "object" || value === null)
+        return null; // skip nested
       return (
-        <p key={key} className="text-sm text-gray-600">
-          <span className="text-gray-800">{formatKey(key)}:</span>{" "}
-          <p className="font-semibold">{String(value) || "N/A"}</p>
+        <p key={key} className="text-sm 2xl:text-lg 3xl:text-xl text-gray-600">
+          <span className="text-gray-800 2xl:text-lg 3xl:text-xl">{formatKey(key)}:</span>{" "}
+          <span className="font-semibold 2xl:text-lg 3xl:text-xl">{String(value) || "N/A"}</span>
         </p>
       );
     });
@@ -31,70 +31,66 @@ export default function ConsumerDetailCards({ consumer }) {
 
   return (
     <div className="flex flex-col gap-6 mt-1">
- 
       <div className="bg-white px-6 py-2">
-  <div className="mt-6 grid grid-cols-4 gap-4 text-sm ml-5 text-gray-600">
-    {Object.entries(consumer).map(([key, value]) => {
-      if (
-        typeof value === "object" ||
-        Array.isArray(value) ||
-        key === "full_name" ||
-        key === "consumer_id" ||
-        key === "properties"
-      )
-        return null;
+        <div className="mt-6 grid grid-cols-4 gap-4 text-sm 2xl:text-lg 3xl:text-xl ml-5 text-gray-600">
+          {Object.entries(consumer).map(([key, value]) => {
+            if (
+              typeof value === "object" ||
+              Array.isArray(value) ||
+              key === "full_name" ||
+              key === "consumer_id" ||
+              key === "properties"
+            )
+              return null;
 
-      return (
-        <div key={key}>
-          <p className="text-gray-800">{key.replace(/_/g, " ")}</p>
-          <p className="font-semibold">{String(value) || "N/A"}</p>
+            return (
+              <div key={key}>
+                <p className="text-gray-800 2xl:text-lg 3xl:text-xl">{key.replace(/_/g, " ")}</p>
+                <p className="font-semibold 2xl:text-lg 3xl:text-xl">{String(value) || "N/A"}</p>
+              </div>
+            );
+          })}
         </div>
-      );
-    })}
-  </div>
-</div>
-
-
-
+      </div>
 
       {consumer.properties?.map((property, idx) => (
-        <div key={idx} className="bg-white p-6">
+        <div key={idx} className="bg-white p-6 2xl:p-8 3xl:p-10">
           <div className="flex items-center justify-between mb-3">
-            <h3 className="text-md font-semibold text-blue-600 flex items-center gap-2 uppercase">
+            <h3 className="text-md 2xl:text-xl 3xl:text-2xl font-semibold text-blue-600 flex items-center gap-2 uppercase">
               <FaHome /> Property {idx + 1}
             </h3>
           </div>
 
-          <div className="grid grid-cols-4 gap-4 mb-4">
+          <div className="grid grid-cols-4 gap-4 mb-4 text-sm 2xl:text-lg 3xl:text-xl">
             {renderKeyValue(property)}
           </div>
 
-
           <div className="mt-4">
-            <h4 className="font-semibold text-blue-600 mb-2 flex items-center gap-2 uppercase"><FaPlug />Connections</h4>
+            <h4 className="font-semibold text-blue-600 mb-2 text-sm 2xl:text-lg 3xl:text-xl flex items-center gap-2 uppercase">
+              <FaPlug /> Connections
+            </h4>
             {property.connections?.map((conn, cIdx) => {
               const key = `${idx}-${cIdx}`;
               return (
                 <div key={cIdx} className="border rounded mb-2">
                   <button
-                    className="w-full flex justify-between items-center px-4 py-2 bg-gray-50 text-sm font-medium text-gray-700"
+                    className="w-full flex justify-between items-center px-4 2xl:px-6 3xl:px-8 py-2 2xl:py-3 3xl:py-4 bg-gray-50 text-sm 2xl:text-lg 3xl:text-xl font-medium text-gray-700"
                     onClick={() => toggleConnection(key)}
                   >
                     <span className="flex items-center gap-2">
                       <FaPlug /> Connection {cIdx + 1}
                     </span>
                     <span>
-  {openConnections.includes(key) ? (
-    <RiArrowDropUpLine className="text-xl" />
-  ) : (
-    <RiArrowDropDownLine className="text-xl" />
-  )}
-</span>
-
+                      {openConnections.includes(key) ? (
+                        <RiArrowDropUpLine className="text-xl 2xl:text-2xl 3xl:text-3xl" />
+                      ) : (
+                        <RiArrowDropDownLine className="text-xl 2xl:text-2xl 3xl:text-3xl" />
+                      )}
+                    </span>
                   </button>
 
                   {openConnections.includes(key) && (
-                    <div className="p-4 grid grid-cols-4 gap-4 ">
+                    <div className="p-4 grid grid-cols-4 gap-4 text-sm 2xl:text-lg 3xl:text-xl">
                       {renderKeyValue(conn)}
                     </div>
                   )}

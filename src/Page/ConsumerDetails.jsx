@@ -15,13 +15,12 @@ export default function ConsumerDetails() {
   const [selectedConsumer, setSelectedConsumer] = useState(null);
   const [searched, setSearched] = useState(false);
 
-  
   useEffect(() => {
     async function fetchConsumers() {
       try {
-        const token = localStorage.getItem("token"); 
+        const token = localStorage.getItem("token");
         const response = await axios.get(
-          "https://magneetarsolutions.com/api/consumers",
+          "https://magneetarsolutions.com/api/consumers"
           // {
           //   headers: token ? { Authorization: `Bearer ${token}` } : {},
           // }
@@ -31,7 +30,6 @@ export default function ConsumerDetails() {
       } catch (err) {
         console.error("Error fetching consumers:", err);
         if (err.response?.status === 401) {
-          console.error("Unauthorized, logging out...");
           localStorage.removeItem("token");
           localStorage.removeItem("user_id");
           localStorage.removeItem("user");
@@ -103,81 +101,82 @@ export default function ConsumerDetails() {
 
   return (
     <div className="px-4 py-6 bg-[#F6F7FF] min-h-screen">
-      <div className="flex justify-between items-center mb-4">
-        <p className="text-lg font-semibold text-[#1e1e60]">
-          WASA Consumer Record
-        </p>
+     <div className="flex justify-between items-center mb-4">
+  <p className="text-lg font-semibold text-[#1e1e60] 2xl:text-2xl 3xl:text-3xl">
+    WASA Consumer Record
+  </p>
 
-        <div className="flex items-center gap-2">
-          <select
-            value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value)}
-            className="rounded-md px-3 py-2 border border-gray-300 bg-white text-sm focus:outline-none focus:ring-1 focus:ring-blue-300"
-          >
-            <option value="">All Status</option>
-            {uniqueStatuses.map((status) => (
-              <option key={status} value={status}>
-                {status}
-              </option>
-            ))}
-          </select>
+  <div className="flex items-center gap-2 2xl:gap-3 3xl:gap-4">
+    <select
+      value={statusFilter}
+      onChange={(e) => setStatusFilter(e.target.value)}
+      className="rounded-md px-3 py-2 2xl:px-4 2xl:py-3 3xl:px-5 3xl:py-4 border border-gray-300 bg-white text-sm 2xl:text-base 3xl:text-lg focus:outline-none focus:ring-1 focus:ring-blue-300"
+    >
+      <option value="">All Status</option>
+      {uniqueStatuses.map((status) => (
+        <option key={status} value={status}>
+          {status}
+        </option>
+      ))}
+    </select>
 
-          <select
-            value={wardFilter}
-            onChange={(e) => setWardFilter(e.target.value)}
-            className="rounded-md px-3 py-2 border border-gray-300 bg-white text-sm focus:outline-none focus:ring-1 focus:ring-blue-300"
-          >
-            <option value="">All Wards</option>
-            {uniqueWards.map((ward) => (
-              <option key={ward} value={ward}>
-                {ward}
-              </option>
-            ))}
-          </select>
+    <select
+      value={wardFilter}
+      onChange={(e) => setWardFilter(e.target.value)}
+      className="rounded-md px-3 py-2 2xl:px-4 2xl:py-3 3xl:px-5 3xl:py-4 border border-gray-300 bg-white text-sm 2xl:text-base 3xl:text-lg focus:outline-none focus:ring-1 focus:ring-blue-300"
+    >
+      <option value="">All Wards</option>
+      {uniqueWards.map((ward) => (
+        <option key={ward} value={ward}>
+          {ward}
+        </option>
+      ))}
+    </select>
 
-          <select
-            value={zoneFilter}
-            onChange={(e) => setZoneFilter(e.target.value)}
-            className="rounded-md px-3 py-2 border border-gray-300 bg-white text-sm focus:outline-none focus:ring-1 focus:ring-blue-300"
-          >
-            <option value="">All Zones</option>
-            {uniqueZones.map((zone) => (
-              <option key={zone} value={zone}>
-                {zone}
-              </option>
-            ))}
-          </select>
+    <select
+      value={zoneFilter}
+      onChange={(e) => setZoneFilter(e.target.value)}
+      className="rounded-md px-3 py-2 2xl:px-4 2xl:py-3 3xl:px-5 3xl:py-4 border border-gray-300 bg-white text-sm 2xl:text-base 3xl:text-lg focus:outline-none focus:ring-1 focus:ring-blue-300"
+    >
+      <option value="">All Zones</option>
+      {uniqueZones.map((zone) => (
+        <option key={zone} value={zone}>
+          {zone}
+        </option>
+      ))}
+    </select>
 
-          <input
-            type="text"
-            placeholder="Enter Consumer ID"
-            value={consumerId}
-            onChange={(e) => {
-              setConsumerId(e.target.value);
-              if (e.target.value === "") {
-                setSearchedConsumerId("");
-                setSearched(false);
-              }
-            }}
-            onKeyDown={(e) => {
-              if (e.key === "Enter" && consumerId.trim()) {
-                handleSearch();
-              }
-            }}
-            className="rounded-md w-72 px-4 bg-white border border-gray-300 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500"
-          />
+    <input
+      type="text"
+      placeholder="Enter Consumer ID"
+      value={consumerId}
+      onChange={(e) => {
+        setConsumerId(e.target.value);
+        if (e.target.value === "") {
+          setSearchedConsumerId("");
+          setSearched(false);
+        }
+      }}
+      onKeyDown={(e) => {
+        if (e.key === "Enter" && consumerId.trim()) {
+          handleSearch();
+        }
+      }}
+      className="rounded-md w-72 2xl:w-96 3xl:w-[26rem] px-4 2xl:px-5 3xl:px-6 py-2 2xl:py-3 3xl:py-4 bg-white border border-gray-300 text-sm 2xl:text-base 3xl:text-lg focus:outline-none focus:ring-1 focus:ring-blue-500"
+    />
 
-          <button
-            onClick={handleSearch}
-            disabled={!consumerId.trim()}
-            className={`flex items-center px-4 py-2 rounded-md text-white bg-blue-500 hover:bg-blue-800 transition ${
-              !consumerId.trim() ? "opacity-50 cursor-not-allowed" : ""
-            }`}
-          >
-            <TbSearch />
-          </button>
-        </div>
-      </div>
+    <button
+      onClick={handleSearch}
+      disabled={!consumerId.trim()}
+      className={`flex items-center px-4 2xl:px-5 3xl:px-6 py-2 2xl:py-3 3xl:py-4 rounded-md text-white bg-blue-500 hover:bg-blue-800 transition ${
+        !consumerId.trim() ? "opacity-50 cursor-not-allowed" : ""
+      }`}
+    >
+      <TbSearch className="w-4 h-4 2xl:w-5 2xl:h-5 3xl:w-6 3xl:h-6" />
+    </button>
+  </div>
+</div>
+
 
       <div className="flex flex-col gap-4">
         {!searched && displayedConsumers.length === 0 ? (
@@ -198,17 +197,17 @@ export default function ConsumerDetails() {
                 className="flex items-center justify-between mb-3 mx-5"
                 onClick={() => handleCardClick(consumer)}
               >
-                <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 text-xl">
+                <div className="flex items-center gap-3 2xl:gap-6 3xl:gap-8">
+                  <div className="w-12 h-12 2xl:w-16 2xl:h-16 3xl:w-20 3xl:h-20 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 text-xl 2xl:text-2xl 3xl:text-3xl">
                     <FaUser />
                   </div>
                   <div>
-                    <p className="font-semibold">
+                    <p className="font-semibold text-base 2xl:text-xl 3xl:text-2xl">
                       {consumer.full_name || "N/A"}
                     </p>
-                    <p className="text-sm text-gray-500">
+                    <p className="text-gray-500 text-sm 2xl:text-base 3xl:text-lg">
                       ID:{" "}
-                      <span className="font-semibold">
+                      <span className="font-semibold text-base 2xl:text-lg 3xl:text-xl">
                         {consumer.consumer_id || "N/A"}
                       </span>
                     </p>

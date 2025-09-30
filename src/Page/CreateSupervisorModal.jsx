@@ -7,6 +7,7 @@ export default function CreateSupervisorModal({ isModalOpen, setIsModalOpen, set
   const [toastMessage, setToastMessage] = useState("");
   const [toastType, setToastType] = useState("success");
   const [showPassword, setShowPassword] = useState(false);
+  const [isLargeScreen, setIsLargeScreen] = useState(window.innerWidth >= 1536);
 
   const SUPERVISOR_ROLE_ID = "9a9a41ca-4d6d-4827-949c-3f14f22c6aa5";
 
@@ -20,17 +21,20 @@ export default function CreateSupervisorModal({ isModalOpen, setIsModalOpen, set
     role_id: SUPERVISOR_ROLE_ID,
   });
 
+  useEffect(() => {
+    const handleResize = () => setIsLargeScreen(window.innerWidth >= 1536);
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
   const isEmailValid = (email) => /\S+@\S+\.\S+/.test(email);
   const isPhoneValid = (phone) => /^\d{11}$/.test(phone);
 
-  const isFormValid = () => {
-    return (
-      newSupervisor.full_name.trim() !== "" &&
-      isPhoneValid(newSupervisor.phone) &&
-      isEmailValid(newSupervisor.email) &&
-      newSupervisor.password.trim() !== ""
-    );
-  };
+  const isFormValid = () =>
+    newSupervisor.full_name.trim() !== "" &&
+    isPhoneValid(newSupervisor.phone) &&
+    isEmailValid(newSupervisor.email) &&
+    newSupervisor.password.trim() !== "";
 
   const handleCreate = async () => {
     if (!isFormValid()) {
@@ -45,19 +49,10 @@ export default function CreateSupervisorModal({ isModalOpen, setIsModalOpen, set
       const data = response.data;
 
       if (data && data.success) {
-        const updatedSupervisor = {
-          ...newSupervisor,
-          id: data.user_id,
-          created_at: new Date().toISOString(),
-        };
-
-        // update parent state
-        setUsers((prev) => [...prev, updatedSupervisor]);
-
-        setToastMessage(data.message || "Supervisor created successfully!");
+        setUsers((prev) => [...prev, { ...newSupervisor, id: data.user_id }]);
+        setToastMessage("Supervisor created successfully!");
         setToastType("success");
 
-        // reset form
         setNewSupervisor({
           username: "",
           email: "",
@@ -92,99 +87,86 @@ export default function CreateSupervisorModal({ isModalOpen, setIsModalOpen, set
   if (!isModalOpen) return null;
 
   return (
-    <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-30 z-50">
-      <div className="bg-white p-6 rounded shadow-lg w-[500px] max-w-full relative">
-        {/* Close */}
+    <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-30 z-50" onClick={() => setIsModalOpen(false)}>
+      <div
+        className={`bg-white rounded shadow-lg relative max-w-full ${isLargeScreen ? "w-[800px] p-10" : "w-[500px] p-6"}`}
+        onClick={(e) => e.stopPropagation()}
+      >
         <button
           onClick={() => setIsModalOpen(false)}
-          className="absolute top-2 right-2 text-gray-500 hover:text-gray-800 text-lg font-bold"
+          className={`absolute top-2 right-2 font-bold text-gray-500 hover:text-gray-800 ${isLargeScreen ? "text-2xl" : "text-lg"}`}
         >
           ×
         </button>
 
-        <h3 className="text-lg font-semibold mb-4">Create Supervisor</h3>
+        <h3 className={`mb-4 font-semibold ${isLargeScreen ? "text-2xl" : "text-lg"}`}>Create Supervisor</h3>
 
-        {/* Form */}
-        <div className="grid grid-cols-2 gap-4 mb-4">
+        <div className={`grid grid-cols-2 gap-4 mb-4 ${isLargeScreen ? "gap-6" : ""}`}>
           {/* Username */}
           <div>
-            <label className="block text-sm font-medium mb-1">Username</label>
+            <label className={`block mb-1 font-medium ${isLargeScreen ? "text-lg" : "text-sm"}`}>Username</label>
             <input
               type="text"
               placeholder="supervisor01"
               value={newSupervisor.username}
-              onChange={(e) =>
-                setNewSupervisor({ ...newSupervisor, username: e.target.value })
-              }
-              className="border px-3 py-1 rounded w-full focus:outline-none text-sm"
+              onChange={(e) => setNewSupervisor({ ...newSupervisor, username: e.target.value })}
+              className={`border rounded w-full px-3 ${isLargeScreen ? "py-3 text-lg" : "py-1 text-sm"} focus:outline-none focus:border-blue-500`}
             />
           </div>
 
           {/* Full Name */}
           <div>
-            <label className="block text-sm font-medium mb-1">Full Name</label>
+            <label className={`block mb-1 font-medium ${isLargeScreen ? "text-lg" : "text-sm"}`}>Full Name</label>
             <input
               type="text"
               placeholder="John Doe"
               value={newSupervisor.full_name}
-              onChange={(e) =>
-                setNewSupervisor({ ...newSupervisor, full_name: e.target.value })
-              }
-              className="border px-3 py-1 rounded w-full focus:outline-none text-sm"
+              onChange={(e) => setNewSupervisor({ ...newSupervisor, full_name: e.target.value })}
+              className={`border rounded w-full px-3 ${isLargeScreen ? "py-3 text-lg" : "py-1 text-sm"} focus:outline-none focus:border-blue-500`}
             />
           </div>
 
           {/* Phone */}
           <div>
-            <label className="block text-sm font-medium mb-1">Phone</label>
+            <label className={`block mb-1 font-medium ${isLargeScreen ? "text-lg" : "text-sm"}`}>Phone</label>
             <input
               type="text"
               placeholder="03001234567"
               value={newSupervisor.phone}
-              onChange={(e) =>
-                setNewSupervisor({ ...newSupervisor, phone: e.target.value })
-              }
-              className={`border px-3 py-1 rounded w-full focus:outline-none text-sm ${
-                newSupervisor.phone && !isPhoneValid(newSupervisor.phone)
-                  ? "border-red-500"
-                  : "focus:border-blue-500"
+              onChange={(e) => setNewSupervisor({ ...newSupervisor, phone: e.target.value })}
+              className={`border rounded w-full px-3 ${isLargeScreen ? "py-3 text-lg" : "py-1 text-sm"} focus:outline-none ${
+                newSupervisor.phone && !isPhoneValid(newSupervisor.phone) ? "border-red-500" : "focus:border-blue-500"
               }`}
             />
           </div>
 
           {/* Email */}
           <div>
-            <label className="block text-sm font-medium mb-1">Email</label>
+            <label className={`block mb-1 font-medium ${isLargeScreen ? "text-lg" : "text-sm"}`}>Email</label>
             <input
               type="email"
               placeholder="example@gmail.com"
               value={newSupervisor.email}
-              onChange={(e) =>
-                setNewSupervisor({ ...newSupervisor, email: e.target.value })
-              }
-              className={`border px-3 py-1 rounded w-full focus:outline-none text-sm ${
-                newSupervisor.email && !isEmailValid(newSupervisor.email)
-                  ? "border-red-500"
-                  : "focus:border-blue-500"
+              onChange={(e) => setNewSupervisor({ ...newSupervisor, email: e.target.value })}
+              className={`border rounded w-full px-3 ${isLargeScreen ? "py-3 text-lg" : "py-1 text-sm"} focus:outline-none ${
+                newSupervisor.email && !isEmailValid(newSupervisor.email) ? "border-red-500" : "focus:border-blue-500"
               }`}
             />
           </div>
 
           {/* Password */}
           <div>
-            <label className="block text-sm font-medium mb-1">Password</label>
+            <label className={`block mb-1 font-medium ${isLargeScreen ? "text-lg" : "text-sm"}`}>Password</label>
             <div className="relative">
               <input
                 type={showPassword ? "text" : "password"}
                 placeholder="Enter password"
                 value={newSupervisor.password}
-                onChange={(e) =>
-                  setNewSupervisor({ ...newSupervisor, password: e.target.value })
-                }
-                className="border px-3 py-1 rounded w-full focus:outline-none text-sm"
+                onChange={(e) => setNewSupervisor({ ...newSupervisor, password: e.target.value })}
+                className={`border rounded w-full px-3 ${isLargeScreen ? "py-3 text-lg" : "py-1 text-sm"} focus:outline-none focus:border-blue-500`}
               />
               <span
-                className="absolute right-2 top-1/2 transform -translate-y-1/2 cursor-pointer text-gray-500"
+                className={`absolute right-2 top-1/2 transform -translate-y-1/2 cursor-pointer text-gray-500 ${isLargeScreen ? "text-xl" : "text-base"}`}
                 onClick={() => setShowPassword(!showPassword)}
               >
                 {showPassword ? <FaEyeSlash /> : <FaEye />}
@@ -194,13 +176,11 @@ export default function CreateSupervisorModal({ isModalOpen, setIsModalOpen, set
 
           {/* Status */}
           <div>
-            <label className="block text-sm font-medium mb-1">Status</label>
+            <label className={`block mb-1 font-medium ${isLargeScreen ? "text-lg" : "text-sm"}`}>Status</label>
             <select
               value={newSupervisor.status}
-              onChange={(e) =>
-                setNewSupervisor({ ...newSupervisor, status: e.target.value })
-              }
-              className="border px-3 py-1 rounded w-full focus:outline-none text-sm"
+              onChange={(e) => setNewSupervisor({ ...newSupervisor, status: e.target.value })}
+              className={`border rounded w-full px-3 ${isLargeScreen ? "py-3 text-lg" : "py-1 text-sm"} focus:outline-none focus:border-blue-500`}
             >
               <option value="active">Active</option>
               <option value="inactive">Inactive</option>
@@ -209,20 +189,18 @@ export default function CreateSupervisorModal({ isModalOpen, setIsModalOpen, set
         </div>
 
         {/* Buttons */}
-        <div className="flex justify-between gap-2">
+        <div className={`flex justify-between gap-2 ${isLargeScreen ? "mt-6" : ""}`}>
           <button
             onClick={() => setIsModalOpen(false)}
-            className="px-4 py-2 rounded bg-gray-200 hover:bg-gray-300"
+            className={`px-4 rounded ${isLargeScreen ? "py-3 text-lg" : "py-2 text-sm"} bg-gray-200 hover:bg-gray-300`}
             disabled={loading}
           >
             Cancel
           </button>
           <button
             onClick={handleCreate}
-            className={`px-4 py-2 rounded text-white ${
-              isFormValid()
-                ? "bg-blue-600 hover:bg-blue-700"
-                : "bg-gray-400 cursor-not-allowed"
+            className={`px-4 rounded ${isLargeScreen ? "py-3 text-lg" : "py-2 text-sm"} text-white ${
+              isFormValid() ? "bg-blue-600 hover:bg-blue-700" : "bg-gray-400 cursor-not-allowed"
             }`}
             disabled={loading || !isFormValid()}
           >
@@ -230,12 +208,11 @@ export default function CreateSupervisorModal({ isModalOpen, setIsModalOpen, set
           </button>
         </div>
 
-        {/* Toast */}
         {toastMessage && (
           <div
             className={`fixed top-5 right-5 px-4 py-2 rounded shadow-lg text-white ${
               toastType === "success" ? "bg-green-500" : "bg-red-500"
-            }`}
+            } ${isLargeScreen ? "text-lg" : "text-sm"}`}
           >
             {toastMessage}
           </div>

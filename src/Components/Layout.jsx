@@ -11,13 +11,13 @@ import TicketTabs from "../Page/Ticket";
 
 export default function Layout() {
   return (
-    <div className="flex h-screen overflow-hidden">
+    <div className="flex h-screen overflow-hidden text-sm 2xl:text-base">
       <Sidebar />
 
       <div className="flex flex-col flex-1 overflow-hidden bg-[#F6F7FF]">
         <Navbar />
 
-        <main className="px-2 flex-1 overflow-y-auto">
+        <main className="px-2 2xl:px-6 flex-1 overflow-y-auto">
           <Routes>
             <Route
               path="/"
@@ -67,7 +67,7 @@ export default function Layout() {
               path="/ticket-status"
               element={
                 <ProtectedRoute allowedRoles={['Super Admin', 'Supervisor']}>
-                  <TicketTabs/>
+                  <TicketTabs />
                 </ProtectedRoute>
               }
             />

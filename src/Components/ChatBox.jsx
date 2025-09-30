@@ -19,7 +19,7 @@ export default function ChatBox({
   const loginUserId = localStorage.getItem("user_id");
 
   useEffect(() => {
-     if (!surveyId) return;
+    if (!surveyId) return;
     const fetchMessages = async () => {
       try {
         const res = await getMessages(ticketId, token, surveyId);
@@ -68,19 +68,17 @@ export default function ChatBox({
   };
 
   return (
-    <div className="flex flex-col bg-white h-[327px]">
+    <div className="flex flex-col bg-white h-[327px] 2xl:h-full 2xl:text-lg">
       <div className="flex-1 p-4 space-y-3 overflow-y-auto custom-scrollbar">
         {chatMessages.map((msg, index) => (
           <div
             key={index}
-            className={`flex items-start gap-2 ${
-              msg.isMine ? "justify-end" : "justify-start"
-            }`}
+            className={`flex items-start gap-2 ${msg.isMine ? "justify-end" : "justify-start"}`}
           >
             {!msg.isMine && <FaUserCircle size={22} className="text-gray-500 mt-1" />}
 
             <div
-              className={`px-4 py-2 rounded-lg text-sm max-w-[70%] break-words
+              className={`px-4 py-2 rounded-lg max-w-[70%] break-words text-sm 2xl:text-lg
                 ${msg.isMine ? "bg-blue-600 text-white" : "bg-gray-100 text-gray-800"}`}
             >
               {msg.text}
@@ -91,7 +89,6 @@ export default function ChatBox({
         ))}
       </div>
 
-      
       <TabSelector filter={filter} setFilter={setFilter} surveyId={surveyId} />
 
       <div className="flex items-center p-3 border-t">
@@ -101,17 +98,17 @@ export default function ChatBox({
           value={input}
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={(e) => { if (e.key === "Enter") handleSend(); }}
-          className="border rounded px-3 py-2 text-sm w-full mr-2 focus:outline-none focus:ring-1 focus:ring-blue-500"
+          className="border rounded px-3 py-2 text-sm 2xl:text-lg w-full mr-2 focus:outline-none focus:ring-1 focus:ring-blue-500"
         />
         <button
           onClick={handleSend}
-          className="bg-blue-500 text-white px-3 py-2 rounded hover:bg-blue-600"
+          className="bg-blue-500 text-white px-3 py-2 rounded hover:bg-blue-600 2xl:text-lg"
         >
           ➤
         </button>
         <button
           onClick={onClose}
-          className="ml-2 text-sm text-gray-500 hover:text-red-600"
+          className="ml-2 text-sm 2xl:text-lg text-gray-500 hover:text-red-600"
         >
           Close
         </button>
