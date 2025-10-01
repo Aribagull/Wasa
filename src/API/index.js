@@ -1,24 +1,29 @@
 import axiosInstance from "../Context/axiosInstance.js";
 
 // LOGIN USER
+
 export async function loginUser({ email, password }) {
   try {
     const response = await axiosInstance.post("/users/auth", { email, password });
 
     if (response.data?.token) {
-  localStorage.setItem("token", response.data.token);
-  localStorage.setItem("user", JSON.stringify(response.data.user || {}));
+      localStorage.setItem("token", response.data.token);
+      localStorage.setItem("user", JSON.stringify(response.data.user || {}));
 
-  if (response.data.user?.user_id) {
-    localStorage.setItem("user_id", response.data.user.user_id);
-  }
-}
+      if (response.data.user?.user_id) {
+        localStorage.setItem("user_id", response.data.user.user_id);
+      }
+    }
 
-    return response.data;
+    return response.data; 
   } catch (error) {
-    throw new Error(error.response?.data?.message || "Network error. Please try again later.");
+    return {
+      success: false,
+      message: error.response?.data?.message || "Network error. Please try again later."
+    };
   }
 }
+
 
 // CREATE SUPERVISOR
 export async function createSupervisor(newSupervisor) {

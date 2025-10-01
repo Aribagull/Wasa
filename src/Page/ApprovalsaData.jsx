@@ -16,7 +16,6 @@ export default function SurveyDetails() {
   const [toast, setToast] = useState("");
   const [isLargeScreen, setIsLargeScreen] = useState(window.innerWidth >= 1536);
 
-  // Detect window resize
   useEffect(() => {
     const handleResize = () => {
       setIsLargeScreen(window.innerWidth >= 1536);
@@ -65,6 +64,7 @@ export default function SurveyDetails() {
 
             return {
               cid: consumer.consumer_code || connection.consumer_id || "N/A",
+              old_code: entry?.old_code ?? "N/A",
               name: consumer.full_name || "N/A",
               cnic: consumer.cnic || "N/A",
               uc: property.uc || survey.uc || "N/A",
@@ -76,12 +76,12 @@ export default function SurveyDetails() {
               index: i,
               fullData: entry,
               releaseReason: "",
-              surveyedAt: survey.surveyed_at || entry.created_at || null, // ✅ added timestamp
+              surveyedAt: survey.surveyed_at || entry.created_at || null,
             };
           })
           .filter((row) => row.name !== "N/A" && row.cnic !== "N/A");
 
-        // ✅ Sort latest survey first
+       
         mappedData.sort((a, b) => {
           if (!a.surveyedAt) return 1;
           if (!b.surveyedAt) return -1;
@@ -110,7 +110,8 @@ export default function SurveyDetails() {
       data: tableData,
       columns: [
         { title: "#", data: null, render: (data, type, row, meta) => meta.row + 1 },
-        { title: "Consumer Code", data: "cid" },
+        { title: "Consumer ID", data: "cid" },
+        {  title: "Old Code",  data: "old_code",  render: (data) => data ?? "N/A", },
         { title: "Name", data: "name" },
         { title: "CNIC", data: "cnic" },
         { title: "Status", data: "status" },
@@ -120,7 +121,7 @@ export default function SurveyDetails() {
         { title: "Ward", data: "ward" },
         { title: "Water Unit", data: "water_unit" },
         {
-          title: "Surveyed At", // ✅ added column
+          title: "Surveyed At", 
           data: "surveyedAt",
           render: (data) => (data ? new Date(data).toLocaleString() : "N/A"),
         },
@@ -142,7 +143,7 @@ export default function SurveyDetails() {
       pageLength: pageLength,
       createdRow: function (row) {
         if (isLargeScreen) {
-          $(row).css("font-size", "1.125rem"); // Large screen text bigger
+          $(row).css("font-size", "1.125rem"); 
         }
       },
     });

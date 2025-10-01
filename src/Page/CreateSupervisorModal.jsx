@@ -49,10 +49,22 @@ export default function CreateSupervisorModal({ isModalOpen, setIsModalOpen, set
       const data = response.data;
 
       if (data && data.success) {
-        setUsers((prev) => [...prev, { ...newSupervisor, id: data.user_id }]);
+     
+        setUsers({
+  id: data.user_id,
+  username: newSupervisor.username,
+  full_name: newSupervisor.full_name,
+  email: newSupervisor.email,
+  phone: newSupervisor.phone,
+  status: newSupervisor.status,
+  role_id: newSupervisor.role_id,
+  created_at: new Date().toISOString(),
+});
+
         setToastMessage("Supervisor created successfully!");
         setToastType("success");
 
+     
         setNewSupervisor({
           username: "",
           email: "",
@@ -87,11 +99,15 @@ export default function CreateSupervisorModal({ isModalOpen, setIsModalOpen, set
   if (!isModalOpen) return null;
 
   return (
-    <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-30 z-50" onClick={() => setIsModalOpen(false)}>
+    <div
+      className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-30 z-50"
+      onClick={() => setIsModalOpen(false)}
+    >
       <div
         className={`bg-white rounded shadow-lg relative max-w-full ${isLargeScreen ? "w-[800px] p-10" : "w-[500px] p-6"}`}
         onClick={(e) => e.stopPropagation()}
       >
+
         <button
           onClick={() => setIsModalOpen(false)}
           className={`absolute top-2 right-2 font-bold text-gray-500 hover:text-gray-800 ${isLargeScreen ? "text-2xl" : "text-lg"}`}
@@ -100,9 +116,7 @@ export default function CreateSupervisorModal({ isModalOpen, setIsModalOpen, set
         </button>
 
         <h3 className={`mb-4 font-semibold ${isLargeScreen ? "text-2xl" : "text-lg"}`}>Create Supervisor</h3>
-
         <div className={`grid grid-cols-2 gap-4 mb-4 ${isLargeScreen ? "gap-6" : ""}`}>
-          {/* Username */}
           <div>
             <label className={`block mb-1 font-medium ${isLargeScreen ? "text-lg" : "text-sm"}`}>Username</label>
             <input
@@ -113,8 +127,6 @@ export default function CreateSupervisorModal({ isModalOpen, setIsModalOpen, set
               className={`border rounded w-full px-3 ${isLargeScreen ? "py-3 text-lg" : "py-1 text-sm"} focus:outline-none focus:border-blue-500`}
             />
           </div>
-
-          {/* Full Name */}
           <div>
             <label className={`block mb-1 font-medium ${isLargeScreen ? "text-lg" : "text-sm"}`}>Full Name</label>
             <input
@@ -125,8 +137,6 @@ export default function CreateSupervisorModal({ isModalOpen, setIsModalOpen, set
               className={`border rounded w-full px-3 ${isLargeScreen ? "py-3 text-lg" : "py-1 text-sm"} focus:outline-none focus:border-blue-500`}
             />
           </div>
-
-          {/* Phone */}
           <div>
             <label className={`block mb-1 font-medium ${isLargeScreen ? "text-lg" : "text-sm"}`}>Phone</label>
             <input
@@ -139,8 +149,6 @@ export default function CreateSupervisorModal({ isModalOpen, setIsModalOpen, set
               }`}
             />
           </div>
-
-          {/* Email */}
           <div>
             <label className={`block mb-1 font-medium ${isLargeScreen ? "text-lg" : "text-sm"}`}>Email</label>
             <input
@@ -153,8 +161,6 @@ export default function CreateSupervisorModal({ isModalOpen, setIsModalOpen, set
               }`}
             />
           </div>
-
-          {/* Password */}
           <div>
             <label className={`block mb-1 font-medium ${isLargeScreen ? "text-lg" : "text-sm"}`}>Password</label>
             <div className="relative">
@@ -174,7 +180,6 @@ export default function CreateSupervisorModal({ isModalOpen, setIsModalOpen, set
             </div>
           </div>
 
-          {/* Status */}
           <div>
             <label className={`block mb-1 font-medium ${isLargeScreen ? "text-lg" : "text-sm"}`}>Status</label>
             <select
@@ -188,7 +193,6 @@ export default function CreateSupervisorModal({ isModalOpen, setIsModalOpen, set
           </div>
         </div>
 
-        {/* Buttons */}
         <div className={`flex justify-between gap-2 ${isLargeScreen ? "mt-6" : ""}`}>
           <button
             onClick={() => setIsModalOpen(false)}

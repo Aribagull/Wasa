@@ -9,7 +9,8 @@ export default function ApprovalAction({ isOpen, onClose, row, onUpdateStatus })
   const [showReasonBox, setShowReasonBox] = useState(false);
   const [rejectionReason, setRejectionReason] = useState("");
   const [popupMessage, setPopupMessage] = useState("");
-  const [popupType, setPopupType] = useState(""); 
+  const [popupType, setPopupType] = useState("");
+  const [fullscreenImage, setFullscreenImage] = useState(null);
 
   const [isLargeScreen, setIsLargeScreen] = useState(window.innerWidth >= 1536);
 
@@ -36,24 +37,34 @@ export default function ApprovalAction({ isOpen, onClose, row, onUpdateStatus })
 
   if (!showModal || !row) return null;
 
-  const {
-    consumer = {},
-    property = {},
-    connection = {},
-    survey_status,
-    survey_type,
-    remarks,
-  } = row;
+  const surveyData = row.survey || {};
 
-  const survey_id = row.survey_id || row.survey?.survey_id;
+  const consumer = row.consumer || surveyData.consumer || {};
+  const property = row.property || surveyData.property || {};
+  const connection = row.connection || surveyData.connection || {};
 
-  const renderFields = (data, priorityOrder = []) => {
+  const survey_id = row.survey_id || surveyData.survey_id || "";
+  const survey_status = row.survey_status || surveyData.survey_status || "";
+  const survey_type = row.survey_type || surveyData.survey_type || "";
+  const remarks = row.remarks || surveyData.remarks || "";
+
+ 
+  const getImageUrl = (url) => {
+    if (!url) return "";
+    const fileName = url.split("/").pop();
+    return `https://www.magneetarsolutions.com/${fileName}`;
+  };
+
+  const renderFields = (data, priorityOrder = [], excludeKeys = []) => {
     if (!data) return null;
     const orderedEntries = [
-      ...priorityOrder.filter((key) => key in data).map((key) => [key, data[key]]),
-      ...Object.entries(data).filter(([key]) => !priorityOrder.includes(key)),
+      ...priorityOrder
+        .filter((key) => key in data && !excludeKeys.includes(key))
+        .map((key) => [key, data[key]]),
+      ...Object.entries(data).filter(
+        ([key]) => !priorityOrder.includes(key) && !excludeKeys.includes(key)
+      ),
     ];
-
     return orderedEntries.map(([key, value]) => (
       <div key={key}>
         <p className={`${isLargeScreen ? "text-lg" : "text-xs"} text-gray-500 capitalize`}>
@@ -67,7 +78,7 @@ export default function ApprovalAction({ isOpen, onClose, row, onUpdateStatus })
   const showToast = (message, type) => {
     setPopupMessage(message);
     setPopupType(type);
-    setTimeout(() => setPopupMessage(""), 3000); 
+    setTimeout(() => setPopupMessage(""), 3000);
   };
 
   const handleRelease = async () => {
@@ -103,9 +114,23 @@ export default function ApprovalAction({ isOpen, onClose, row, onUpdateStatus })
   };
 
   const handleApprove = () => {
-    onUpdateStatus(consumer.consumer_code, "Approved", null, null, "Ticket approved successfully!");
+    onUpdateStatus(
+      consumer.consumer_code,
+      "Approved",
+      null,
+      null,
+      "Ticket approved successfully!"
+    );
     showToast("Ticket approved successfully!", "success");
     onClose();
+  };
+
+  const handleImageClick = (url) => {
+    setFullscreenImage(url);
+  };
+
+  const closeFullscreen = () => {
+    setFullscreenImage(null);
   };
 
   return (
@@ -121,37 +146,35 @@ export default function ApprovalAction({ isOpen, onClose, row, onUpdateStatus })
       >
 
         <div className="flex justify-between items-center px-2 py-3 border-b">
-          <h2 className={`font-semibold text-[#1e1e60] flex items-center gap-3 ${isLargeScreen ? "text-3xl" : "text-lg"}`}>
+          <h2
+            className={`font-semibold text-[#1e1e60] flex items-center gap-3 ${
+              isLargeScreen ? "text-3xl" : "text-lg"
+            }`}
+          >
             <BiSolidUserDetail size={isLargeScreen ? 36 : 28} /> WASA Customer Details
           </h2>
-          <button onClick={onClose} className={`text-gray-500 hover:text-gray-700 ${isLargeScreen ? "text-2xl" : "text-base"}`}>
+          <button
+            onClick={onClose}
+            className={`text-gray-500 hover:text-gray-700 ${
+              isLargeScreen ? "text-2xl" : "text-base"
+            }`}
+          >
             ✕
           </button>
         </div>
 
-        <div className={`flex items-center justify-between px-2 py-3 border-b ${isLargeScreen ? "text-lg" : "text-xs"}`}>
-          <div className="flex items-center gap-4">
-            <div>
-              <p className={`font-semibold text-gray-800 ${isLargeScreen ? "text-xl" : "text-sm"}`}>{consumer.full_name}</p>
-              <p className={`${isLargeScreen ? "text-lg" : "text-xs"} text-gray-500`}>{consumer.email}</p>
-            </div>
-          </div>
-          <div className="text-right">
-            <p className={`${isLargeScreen ? "text-lg" : "text-xs"} mb-1`}>
-              Category: <span className="ml-2 text-black">{property.category || ""}</span>
-            </p>
-            <p className={`${isLargeScreen ? "text-lg" : "text-xs"}`}>
-              Status: <span className="ml-8 text-black">{property.status || "N/A"}</span>
-            </p>
-          </div>
-        </div>
-
-        <div className={`flex justify-around border-b px-4 py-3 font-medium bg-gray-50 mt-3 ${isLargeScreen ? "text-xl" : "text-sm"}`}>
+        <div
+          className={`flex justify-around border-b px-4 py-3 font-medium bg-gray-50 mt-3 ${
+            isLargeScreen ? "text-xl" : "text-sm"
+          }`}
+        >
           {["consumer", "property", "connection", "survey"].map((tab) => (
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
-              className={`px-3 py-4 rounded ${activeTab === tab ? "bg-blue-600 text-white" : "text-gray-700"} ${isLargeScreen ? "text-lg" : ""}`}
+              className={`px-3 py-4 rounded ${
+                activeTab === tab ? "bg-blue-600 text-white" : "text-gray-700"
+              } ${isLargeScreen ? "text-lg" : ""}`}
             >
               {tab.charAt(0).toUpperCase() + tab.slice(1)} Info
             </button>
@@ -159,49 +182,94 @@ export default function ApprovalAction({ isOpen, onClose, row, onUpdateStatus })
         </div>
 
         {activeTab === "consumer" && (
-          <div className={`p-4 grid grid-cols-3 gap-4 ${isLargeScreen ? "text-lg" : "text-xs"}`}>
+          <div
+            className={`p-4 grid grid-cols-3 gap-4 ${
+              isLargeScreen ? "text-lg" : "text-xs"
+            }`}
+          >
             {renderFields(consumer, ["full_name", "email", "phone_number", "type"])}
           </div>
         )}
+
         {activeTab === "property" && (
-          <div className={`p-4 grid grid-cols-3 gap-4 ${isLargeScreen ? "text-lg" : "text-xs"}`}>
-            {renderFields(property, ["address", "city", "category", "status"])}
+          <div className="p-4 space-y-6">
+            <div
+              className={`grid grid-cols-3 gap-4 ${
+                isLargeScreen ? "text-lg" : "text-xs"
+              }`}
+            >
+              {renderFields(property, ["address", "city", "category", "status"], ["images"])}
+            </div>
+
+            {property.images && property.images.length > 0 && (
+              <div className="grid grid-cols-3 gap-4">
+                {property.images.map((img, index) => (
+                  <img
+                    key={index}
+                    src={getImageUrl(img)}
+                    alt={`property-${index}`}
+                    onClick={() => handleImageClick(getImageUrl(img))}
+                    className="w-full h-40 object-cover rounded shadow cursor-pointer"
+                  />
+                ))}
+              </div>
+            )}
           </div>
         )}
+
         {activeTab === "connection" && (
-          <div className={`p-4 grid grid-cols-3 gap-4 ${isLargeScreen ? "text-lg" : "text-xs"}`}>
-            {renderFields(connection, ["connection_id", "connection_status", "created_at"])}
+          <div
+            className={`p-4 grid grid-cols-3 gap-4 ${
+              isLargeScreen ? "text-lg" : "text-xs"
+            }`}
+          >
+            {renderFields(connection, [
+              "connection_id",
+              "connection_status",
+              "created_at",
+            ])}
           </div>
         )}
+
         {activeTab === "survey" && (
-          <div className={`p-4 grid grid-cols-3 gap-4 ${isLargeScreen ? "text-lg" : "text-xs"}`}>
+          <div
+            className={`p-4 grid grid-cols-3 gap-4 ${
+              isLargeScreen ? "text-lg" : "text-xs"
+            }`}
+          >
             <div>
               <p className="text-gray-500">Survey ID</p>
-              <p>{survey_id}</p>
+              <p>{survey_id || "-"}</p>
             </div>
             <div>
               <p className="text-gray-500">Survey Status</p>
-              <p>{survey_status}</p>
+              <p>{survey_status || "-"}</p>
             </div>
             <div>
               <p className="text-gray-500">Survey Type</p>
-              <p>{survey_type}</p>
+              <p>{survey_type || "-"}</p>
             </div>
             <div className="col-span-3">
               <p className="text-gray-500">Remarks</p>
-              <p>{remarks}</p>
+              <p>{remarks || "-"}</p>
             </div>
           </div>
         )}
 
         {showReasonBox && (
           <div className="px-6 py-4 bg-red-50">
-            <label className={`block font-medium mb-1 ${isLargeScreen ? "text-lg" : "text-xs"} text-red-800`}>
+            <label
+              className={`block font-medium mb-1 ${
+                isLargeScreen ? "text-lg" : "text-xs"
+              } text-red-800`}
+            >
               Reason for Release Ticket
             </label>
             <textarea
               rows={3}
-              className={`w-full border border-red-300 rounded px-3 py-2 focus:border-black focus:outline-none resize-none ${isLargeScreen ? "text-lg" : "text-xs"}`}
+              className={`w-full border border-red-300 rounded px-3 py-2 focus:border-black focus:outline-none resize-none ${
+                isLargeScreen ? "text-lg" : "text-xs"
+              }`}
               placeholder="Enter reason here..."
               value={rejectionReason}
               onChange={(e) => setRejectionReason(e.target.value)}
@@ -209,23 +277,25 @@ export default function ApprovalAction({ isOpen, onClose, row, onUpdateStatus })
           </div>
         )}
 
-     
         <div className="flex justify-between items-center px-6 py-4">
           <button
             onClick={handleRelease}
-            className={`px-4 py-2 border rounded hover:bg-black hover:text-white text-gray-700 ${isLargeScreen ? "text-lg" : "text-xs"}`}
+            className={`px-4 py-2 border rounded hover:bg-black hover:text-white text-gray-700 ${
+              isLargeScreen ? "text-lg" : "text-xs"
+            }`}
           >
             Release Ticket
           </button>
           <button
             onClick={handleApprove}
-            className={`px-4 py-2 bg-blue-600 text-white rounded hover:bg-gray-800 ${isLargeScreen ? "text-lg" : "text-xs"}`}
+            className={`px-4 py-2 bg-blue-600 text-white rounded hover:bg-gray-800 ${
+              isLargeScreen ? "text-lg" : "text-xs"
+            }`}
           >
             Approve
           </button>
         </div>
 
-       
         {popupMessage && (
           <div
             className={`fixed top-5 right-5 px-4 py-2 rounded shadow-md text-white transition-all duration-300 ${
@@ -233,6 +303,25 @@ export default function ApprovalAction({ isOpen, onClose, row, onUpdateStatus })
             } ${isLargeScreen ? "text-lg" : "text-sm"}`}
           >
             {popupMessage}
+          </div>
+        )}
+
+        {fullscreenImage && (
+          <div
+            className="fixed inset-0 z-[9999] bg-black bg-opacity-90 flex items-center justify-center"
+            onClick={closeFullscreen}
+          >
+            <img
+              src={fullscreenImage}
+              alt="fullscreen"
+              className="max-h-full max-w-full object-contain"
+            />
+            <button
+              onClick={closeFullscreen}
+              className="absolute top-5 right-5 text-white text-3xl"
+            >
+              ✕
+            </button>
           </div>
         )}
       </div>
