@@ -48,7 +48,6 @@ export default function ApprovalAction({ isOpen, onClose, row, onUpdateStatus })
   const survey_type = row.survey_type || surveyData.survey_type || "";
   const remarks = row.remarks || surveyData.remarks || "";
 
- 
   const getImageUrl = (url) => {
     if (!url) return "";
     const fileName = url.split("/").pop();
@@ -57,6 +56,7 @@ export default function ApprovalAction({ isOpen, onClose, row, onUpdateStatus })
 
   const renderFields = (data, priorityOrder = [], excludeKeys = []) => {
     if (!data) return null;
+
     const orderedEntries = [
       ...priorityOrder
         .filter((key) => key in data && !excludeKeys.includes(key))
@@ -65,12 +65,15 @@ export default function ApprovalAction({ isOpen, onClose, row, onUpdateStatus })
         ([key]) => !priorityOrder.includes(key) && !excludeKeys.includes(key)
       ),
     ];
+
     return orderedEntries.map(([key, value]) => (
       <div key={key}>
         <p className={`${isLargeScreen ? "text-lg" : "text-xs"} text-gray-500 capitalize`}>
           {key.replace(/_/g, " ")}
         </p>
-        <p className={`${isLargeScreen ? "text-xl" : "text-xs"}`}>{String(value)}</p>
+        <p className={`${isLargeScreen ? "text-xl" : "text-xs"}`}>
+          {value !== null && value !== "" ? String(value) : "N/A"}
+        </p>
       </div>
     ));
   };
@@ -144,7 +147,6 @@ export default function ApprovalAction({ isOpen, onClose, row, onUpdateStatus })
         }`}
         onClick={(e) => e.stopPropagation()}
       >
-
         <div className="flex justify-between items-center px-2 py-3 border-b">
           <h2
             className={`font-semibold text-[#1e1e60] flex items-center gap-3 ${
@@ -187,7 +189,7 @@ export default function ApprovalAction({ isOpen, onClose, row, onUpdateStatus })
               isLargeScreen ? "text-lg" : "text-xs"
             }`}
           >
-            {renderFields(consumer, ["full_name", "email", "phone_number", "type"])}
+            {renderFields(consumer, ["full_name", "cnic", "phone", "email"])}
           </div>
         )}
 
@@ -198,7 +200,7 @@ export default function ApprovalAction({ isOpen, onClose, row, onUpdateStatus })
                 isLargeScreen ? "text-lg" : "text-xs"
               }`}
             >
-              {renderFields(property, ["address", "city", "category", "status"], ["images"])}
+              {renderFields(property, ["address", "category", "status"], ["images", "consumer"])}
             </div>
 
             {property.images && property.images.length > 0 && (
@@ -224,8 +226,9 @@ export default function ApprovalAction({ isOpen, onClose, row, onUpdateStatus })
             }`}
           >
             {renderFields(connection, [
-              "connection_id",
+              "connection_code",
               "connection_status",
+              "meter_number",
               "created_at",
             ])}
           </div>

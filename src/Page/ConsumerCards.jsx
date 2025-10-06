@@ -18,7 +18,6 @@ export default function ConsumerDetailCards({ consumer }) {
 
   const renderKeyValue = (obj) => {
     return Object.entries(obj).map(([key, value]) => {
-      // skip nested objects or arrays except images
       if (Array.isArray(value) || typeof value === "object") {
         if (key === "images" && Array.isArray(value) && value.length > 0) {
           return (
@@ -62,7 +61,7 @@ export default function ConsumerDetailCards({ consumer }) {
 
   return (
     <div className="flex flex-col gap-6 mt-1">
-      {/* Consumer Basic Info */}
+
       <div className="bg-white px-6 py-2">
         <div className="mt-6 grid grid-cols-4 gap-4 text-sm 2xl:text-lg 3xl:text-xl ml-5 text-gray-600">
           {Object.entries(consumer).map(([key, value]) => {
@@ -87,7 +86,6 @@ export default function ConsumerDetailCards({ consumer }) {
             );
           })}
 
-          {/* Always show consumer.old_code */}
           <div>
             <p className="text-gray-800 2xl:text-lg 3xl:text-xl">Old Code</p>
             <p className="font-semibold 2xl:text-lg 3xl:text-xl">
@@ -97,7 +95,6 @@ export default function ConsumerDetailCards({ consumer }) {
         </div>
       </div>
 
-      {/* Properties */}
       {consumer.properties?.map((property, idx) => (
         <div key={idx} className="bg-white p-6 2xl:p-8 3xl:p-10">
           <div className="flex items-center justify-between mb-3">
@@ -110,15 +107,12 @@ export default function ConsumerDetailCards({ consumer }) {
             {renderKeyValue(property)}
           </div>
 
-          {/* Connections */}
           <div className="mt-4">
             <h4 className="font-semibold text-blue-600 mb-2 text-sm 2xl:text-lg 3xl:text-xl flex items-center gap-2 uppercase">
               <FaPlug /> Connections
             </h4>
             {property.connections?.map((conn, cIdx) => {
               const key = `${idx}-${cIdx}`;
-
-              // Merge consumer.old_code into connection
               const connWithConsumerOldCode = {
                 ...conn,
                 old_code: consumer.old_code,
