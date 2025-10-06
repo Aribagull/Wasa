@@ -64,7 +64,7 @@ export default function SurveyDetails() {
 
             return {
               cid: consumer.consumer_code || connection.consumer_id || "N/A",
-              old_code: entry?.old_code ?? "N/A",
+               old_code: consumer.old_code || "N/A",
               name: consumer.full_name || "N/A",
               cnic: consumer.cnic || "N/A",
               uc: property.uc || survey.uc || "N/A",

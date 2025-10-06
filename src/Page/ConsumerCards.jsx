@@ -18,50 +18,43 @@ export default function ConsumerDetailCards({ consumer }) {
 
   const renderKeyValue = (obj) => {
     return Object.entries(obj).map(([key, value]) => {
-      // Show "N/A" for null, undefined, or empty string
-      if (value === null || value === undefined || value === "") {
-        return (
-          <p key={key} className="text-sm 2xl:text-lg 3xl:text-xl text-gray-600">
-            <span className="text-gray-800 2xl:text-lg 3xl:text-xl">{formatKey(key)}:</span>{" "}
-            <span className="font-semibold 2xl:text-lg 3xl:text-xl">N/A</span>
-          </p>
-        );
-      }
-
-      // Render images if present
-      // Render images if present
-if (key === "images" && Array.isArray(value) && value.length > 0) {
-  return (
-    <div key={key} className="col-span-4 mt-2">
-      <p className="text-gray-800 2xl:text-lg 3xl:text-xl mb-2">{formatKey(key)}:</p>
-      <div className="grid grid-cols-3 gap-2">
-        {value.map((img, idx) => {
-          // Check if img already starts with "http" (full URL), else prepend domain
-          const imgUrl = img.startsWith("http")
-            ? img
-            : `https://www.magneetarsolutions.com/${img}`;
+      // skip nested objects or arrays except images
+      if (Array.isArray(value) || typeof value === "object") {
+        if (key === "images" && Array.isArray(value) && value.length > 0) {
           return (
-            <img
-              key={idx}
-              src={imgUrl}
-              alt={`property-img-${idx}`}
-              className="w-full h-32 object-cover rounded shadow cursor-pointer"
-            />
+            <div key={key} className="col-span-4 mt-2">
+              <p className="text-gray-800 2xl:text-lg 3xl:text-xl mb-2">
+                {formatKey(key)}:
+              </p>
+              <div className="grid grid-cols-3 gap-2">
+                {value.map((img, idx) => {
+                  const imgUrl = img.startsWith("http")
+                    ? img
+                    : `https://www.magneetarsolutions.com/${img}`;
+                  return (
+                    <img
+                      key={idx}
+                      src={imgUrl}
+                      alt={`property-img-${idx}`}
+                      className="w-full h-32 object-cover rounded shadow cursor-pointer"
+                    />
+                  );
+                })}
+              </div>
+            </div>
           );
-        })}
-      </div>
-    </div>
-  );
-}
-
-
-      // Skip nested objects/arrays except images
-      if (Array.isArray(value) || typeof value === "object") return null;
+        }
+        return null;
+      }
 
       return (
         <p key={key} className="text-sm 2xl:text-lg 3xl:text-xl text-gray-600">
-          <span className="text-gray-800 2xl:text-lg 3xl:text-xl">{formatKey(key)}:</span>{" "}
-          <span className="font-semibold 2xl:text-lg 3xl:text-xl">{String(value)}</span>
+          <span className="text-gray-800 2xl:text-lg 3xl:text-xl">
+            {formatKey(key)}:
+          </span>{" "}
+          <span className="font-semibold 2xl:text-lg 3xl:text-xl">
+            {value ?? "N/A"}
+          </span>
         </p>
       );
     });
@@ -69,26 +62,38 @@ if (key === "images" && Array.isArray(value) && value.length > 0) {
 
   return (
     <div className="flex flex-col gap-6 mt-1">
-      {/* Consumer Info */}
+      {/* Consumer Basic Info */}
       <div className="bg-white px-6 py-2">
         <div className="mt-6 grid grid-cols-4 gap-4 text-sm 2xl:text-lg 3xl:text-xl ml-5 text-gray-600">
           {Object.entries(consumer).map(([key, value]) => {
             if (
               typeof value === "object" ||
               Array.isArray(value) ||
+              key === "properties" ||
               key === "full_name" ||
-              key === "consumer_id" ||
-              key === "properties"
+              key === "consumer_id"
             )
               return null;
 
             return (
               <div key={key}>
-                <p className="text-gray-800 2xl:text-lg 3xl:text-xl">{key.replace(/_/g, " ")}</p>
-                <p className="font-semibold 2xl:text-lg 3xl:text-xl">{String(value) || "N/A"}</p>
+                <p className="text-gray-800 2xl:text-lg 3xl:text-xl">
+                  {formatKey(key)}
+                </p>
+                <p className="font-semibold 2xl:text-lg 3xl:text-xl">
+                  {String(value) || "N/A"}
+                </p>
               </div>
             );
           })}
+
+          {/* Always show consumer.old_code */}
+          <div>
+            <p className="text-gray-800 2xl:text-lg 3xl:text-xl">Old Code</p>
+            <p className="font-semibold 2xl:text-lg 3xl:text-xl">
+              {consumer.old_code || "N/A"}
+            </p>
+          </div>
         </div>
       </div>
 
@@ -112,6 +117,13 @@ if (key === "images" && Array.isArray(value) && value.length > 0) {
             </h4>
             {property.connections?.map((conn, cIdx) => {
               const key = `${idx}-${cIdx}`;
+
+              // Merge consumer.old_code into connection
+              const connWithConsumerOldCode = {
+                ...conn,
+                old_code: consumer.old_code,
+              };
+
               return (
                 <div key={cIdx} className="border rounded mb-2">
                   <button
@@ -132,7 +144,7 @@ if (key === "images" && Array.isArray(value) && value.length > 0) {
 
                   {openConnections.includes(key) && (
                     <div className="p-4 grid grid-cols-4 gap-4 text-sm 2xl:text-lg 3xl:text-xl">
-                      {renderKeyValue(conn)}
+                      {renderKeyValue(connWithConsumerOldCode)}
                     </div>
                   )}
                 </div>

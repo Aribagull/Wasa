@@ -56,13 +56,28 @@ export default function TicketUserInfo({ filter, ticket }) {
   const renderSection = (sectionName, obj) => {
     if (!obj || Object.keys(obj).length === 0) return null;
 
-    const fields = Object.entries(obj).filter(
-      ([key, value]) =>
-        key !== "images" &&
-        value &&
-        (typeof value !== "string" ||
-          (!value.startsWith("http") && !value.startsWith("data:image")))
-    );
+   if (!obj || Object.keys(obj).length === 0) return null;
+
+  let priorityOrder = [];
+  if (sectionName === "consumer") {
+    priorityOrder = ["full_name", "cnic", "phone", "consumer_id", "old_code"];
+  } else if (sectionName === "connection") {
+    priorityOrder = ["connection_code", "connection_id", "status", "old_code"];
+  }
+
+  const orderedFields = [
+    ...priorityOrder.filter(key => key in obj).map(key => [key, obj[key]]),
+    ...Object.entries(obj).filter(([key]) => !priorityOrder.includes(key))
+  ];
+
+  const fields = orderedFields.filter(
+    ([key, value]) =>
+      key !== "images" &&
+      value !== null &&
+      value !== "" &&
+      (typeof value !== "string" ||
+        (!value.startsWith("http") && !value.startsWith("data:image")))
+  );
 
     let propertyImages = [];
     if (sectionName === "property") {
