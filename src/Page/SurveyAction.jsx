@@ -75,23 +75,35 @@ export default function ApprovalAction({ isOpen, onClose, row, onUpdateStatus })
       ),
     ];
 
-    return orderedEntries.map(([key, value]) => {
-      let displayValue = value;
+    return orderedEntries
+  .filter(([key, value]) => {
+    if (
+      (key === "domestic_category" && Number(value) === 0) ||
+      (key === "commercial_category" && Number(value) === 0)
+    ) {
+      return false;
+    }
+    return true;
+  })
+  .map(([key, value]) => {
+    let displayValue = value;
 
-    
-      if (key === "domestic_category") {
-        const label = getCategoryLabel("domestic", value);
-        displayValue = `${value} (${label})`;
-      } else if (key === "commercial_category") {
-        const label = getCategoryLabel("commercial", value);
-        displayValue = `${value} (${label})`;
-      }
+    if (key === "domestic_category") {
+      const label = getCategoryLabel("domestic", value);
+      displayValue = `${value} (${label})`;
+    } else if (key === "commercial_category") {
+      const label = getCategoryLabel("commercial", value);
+      displayValue = `${value} (${label})`;
+    }
+
 
       return (
         <div key={key}>
           <p className={`${isLargeScreen ? "text-lg" : "text-xs"} text-gray-500 capitalize`}>
-            {key.replace(/_/g, " ")}
-          </p>
+  {key === "old_code"
+    ? "Old Consumer Code"
+    : key.replace(/_/g, " ")}
+</p>
           <p
             className={`${isLargeScreen ? "text-xl" : "text-xs"} ${
               key === "domestic_category" || key === "commercial_category"
