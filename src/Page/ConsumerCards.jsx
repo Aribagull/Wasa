@@ -64,13 +64,21 @@ export default function ConsumerDetailCards({ consumer }) {
 
       <div className="bg-white px-6 py-2">
         <div className="mt-6 grid grid-cols-4 gap-4 text-sm 2xl:text-lg 3xl:text-xl ml-5 text-gray-600">
+          <div className="col-span-4">
+            <p className="text-gray-800 2xl:text-lg 3xl:text-xl">Old Consumer Code</p>
+            <p className="font-semibold 2xl:text-lg 3xl:text-xl">
+              {consumer.old_code || "N/A"}
+            </p>
+          </div>
+          
           {Object.entries(consumer).map(([key, value]) => {
             if (
               typeof value === "object" ||
               Array.isArray(value) ||
               key === "properties" ||
               key === "full_name" ||
-              key === "consumer_id"
+              key === "consumer_id" ||
+               key === "old_code" 
             )
               return null;
 
@@ -86,12 +94,6 @@ export default function ConsumerDetailCards({ consumer }) {
             );
           })}
 
-          <div>
-            <p className="text-gray-800 2xl:text-lg 3xl:text-xl">Old Code</p>
-            <p className="font-semibold 2xl:text-lg 3xl:text-xl">
-              {consumer.old_code || "N/A"}
-            </p>
-          </div>
         </div>
       </div>
 

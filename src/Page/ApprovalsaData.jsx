@@ -63,8 +63,8 @@ export default function SurveyDetails() {
             const survey = entry?.survey || {};
 
             return {
-              cid: consumer.consumer_code || connection.consumer_id || "N/A",
                old_code: consumer.old_code || "N/A",
+              cid: consumer.consumer_code || connection.consumer_id || "N/A",
               name: consumer.full_name || "N/A",
               cnic: consumer.cnic || "N/A",
               uc: property.uc || survey.uc || "N/A",
@@ -110,8 +110,8 @@ export default function SurveyDetails() {
       data: tableData,
       columns: [
         { title: "#", data: null, render: (data, type, row, meta) => meta.row + 1 },
+        {  title: "Old Consumer Code",  data: "old_code",  render: (data) => data ?? "N/A", },
         { title: "Consumer ID", data: "cid" },
-        {  title: "Old Code",  data: "old_code",  render: (data) => data ?? "N/A", },
         { title: "Name", data: "name" },
         { title: "CNIC", data: "cnic" },
         { title: "Status", data: "status" },

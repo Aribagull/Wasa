@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { BiSolidUserDetail } from "react-icons/bi";
 import { releaseTicket } from "../API/index.js";
+import { domesticCategories, commercialCategories } from "../Data/Categories.js";
 
 export default function ApprovalAction({ isOpen, onClose, row, onUpdateStatus }) {
   const [showModal, setShowModal] = useState(false);
@@ -11,7 +12,6 @@ export default function ApprovalAction({ isOpen, onClose, row, onUpdateStatus })
   const [popupMessage, setPopupMessage] = useState("");
   const [popupType, setPopupType] = useState("");
   const [fullscreenImage, setFullscreenImage] = useState(null);
-
   const [isLargeScreen, setIsLargeScreen] = useState(window.innerWidth >= 1536);
 
   useEffect(() => {
@@ -19,6 +19,17 @@ export default function ApprovalAction({ isOpen, onClose, row, onUpdateStatus })
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
   }, []);
+
+  const getCategoryLabel = (type, id) => {
+    if (type === "domestic") {
+      const found = domesticCategories.find((item) => Number(item.id) === Number(id));
+      return found ? found.label : "N/A";
+    } else if (type === "commercial") {
+      const found = commercialCategories.find((item) => Number(item.id) === Number(id));
+      return found ? found.label : "N/A";
+    }
+    return "N/A";
+  };
 
   useEffect(() => {
     if (isOpen && row) {
@@ -38,11 +49,9 @@ export default function ApprovalAction({ isOpen, onClose, row, onUpdateStatus })
   if (!showModal || !row) return null;
 
   const surveyData = row.survey || {};
-
   const consumer = row.consumer || surveyData.consumer || {};
   const property = row.property || surveyData.property || {};
   const connection = row.connection || surveyData.connection || {};
-
   const survey_id = row.survey_id || surveyData.survey_id || "";
   const survey_status = row.survey_status || surveyData.survey_status || "";
   const survey_type = row.survey_type || surveyData.survey_type || "";
@@ -66,16 +75,35 @@ export default function ApprovalAction({ isOpen, onClose, row, onUpdateStatus })
       ),
     ];
 
-    return orderedEntries.map(([key, value]) => (
-      <div key={key}>
-        <p className={`${isLargeScreen ? "text-lg" : "text-xs"} text-gray-500 capitalize`}>
-          {key.replace(/_/g, " ")}
-        </p>
-        <p className={`${isLargeScreen ? "text-xl" : "text-xs"}`}>
-          {value !== null && value !== "" ? String(value) : "N/A"}
-        </p>
-      </div>
-    ));
+    return orderedEntries.map(([key, value]) => {
+      let displayValue = value;
+
+    
+      if (key === "domestic_category") {
+        const label = getCategoryLabel("domestic", value);
+        displayValue = `${value} (${label})`;
+      } else if (key === "commercial_category") {
+        const label = getCategoryLabel("commercial", value);
+        displayValue = `${value} (${label})`;
+      }
+
+      return (
+        <div key={key}>
+          <p className={`${isLargeScreen ? "text-lg" : "text-xs"} text-gray-500 capitalize`}>
+            {key.replace(/_/g, " ")}
+          </p>
+          <p
+            className={`${isLargeScreen ? "text-xl" : "text-xs"} ${
+              key === "domestic_category" || key === "commercial_category"
+                ? "text-blue-600 font-semibold"
+                : ""
+            }`}
+          >
+            {displayValue !== null && displayValue !== "" ? String(displayValue) : "N/A"}
+          </p>
+        </div>
+      );
+    });
   };
 
   const showToast = (message, type) => {
@@ -142,11 +170,14 @@ export default function ApprovalAction({ isOpen, onClose, row, onUpdateStatus })
       onClick={onClose}
     >
       <div
-        className={`bg-white w-full ${isLargeScreen ? "max-w-4xl" : "max-w-xl"} h-full overflow-y-auto px-5 transform transition-transform duration-300 ease-in-out ${
+        className={`bg-white w-full ${
+          isLargeScreen ? "max-w-4xl" : "max-w-xl"
+        } h-full overflow-y-auto px-5 transform transition-transform duration-300 ease-in-out ${
           animateIn ? "translate-x-0" : "translate-x-full"
         }`}
         onClick={(e) => e.stopPropagation()}
       >
+
         <div className="flex justify-between items-center px-2 py-3 border-b">
           <h2
             className={`font-semibold text-[#1e1e60] flex items-center gap-3 ${
@@ -184,23 +215,20 @@ export default function ApprovalAction({ isOpen, onClose, row, onUpdateStatus })
         </div>
 
         {activeTab === "consumer" && (
-          <div
-            className={`p-4 grid grid-cols-3 gap-4 ${
-              isLargeScreen ? "text-lg" : "text-xs"
-            }`}
-          >
-            {renderFields(consumer, ["full_name", "cnic", "phone", "email"])}
+          <div className={`p-4 grid grid-cols-3 gap-4 ${isLargeScreen ? "text-lg" : "text-xs"}`}>
+            {renderFields(consumer, ["old_code", "full_name", "cnic", "phone", "email"])}
           </div>
         )}
 
         {activeTab === "property" && (
           <div className="p-4 space-y-6">
             <div
-              className={`grid grid-cols-3 gap-4 ${
-                isLargeScreen ? "text-lg" : "text-xs"
-              }`}
+              className={`grid grid-cols-3 gap-4 ${isLargeScreen ? "text-lg" : "text-xs"}`}
             >
-              {renderFields(property, ["address", "category", "status"], ["images", "consumer"])}
+              {renderFields(property, ["address", "domestic_category", "commercial_category"], [
+                "images",
+                "consumer",
+              ])}
             </div>
 
             {property.images && property.images.length > 0 && (
@@ -220,11 +248,7 @@ export default function ApprovalAction({ isOpen, onClose, row, onUpdateStatus })
         )}
 
         {activeTab === "connection" && (
-          <div
-            className={`p-4 grid grid-cols-3 gap-4 ${
-              isLargeScreen ? "text-lg" : "text-xs"
-            }`}
-          >
+          <div className={`p-4 grid grid-cols-3 gap-4 ${isLargeScreen ? "text-lg" : "text-xs"}`}>
             {renderFields(connection, [
               "connection_code",
               "connection_status",
@@ -235,11 +259,7 @@ export default function ApprovalAction({ isOpen, onClose, row, onUpdateStatus })
         )}
 
         {activeTab === "survey" && (
-          <div
-            className={`p-4 grid grid-cols-3 gap-4 ${
-              isLargeScreen ? "text-lg" : "text-xs"
-            }`}
-          >
+          <div className={`p-4 grid grid-cols-3 gap-4 ${isLargeScreen ? "text-lg" : "text-xs"}`}>
             <div>
               <p className="text-gray-500">Survey ID</p>
               <p>{survey_id || "-"}</p>
