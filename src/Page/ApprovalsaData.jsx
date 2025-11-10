@@ -15,6 +15,7 @@ export default function SurveyDetails() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [toast, setToast] = useState("");
   const [isLargeScreen, setIsLargeScreen] = useState(window.innerWidth >= 1536);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const handleResize = () => {
@@ -22,6 +23,68 @@ export default function SurveyDetails() {
     };
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
+ 
+  const mapSurveyEntry = (entry, i) => {
+    const consumer = entry?.consumer || {};
+    const property = entry?.property || {};
+    const connection = entry?.connection || {};
+    const survey = entry?.survey || {};
+
+    return {
+      old_code: consumer.old_code || "N/A",
+      cid: consumer.consumer_code || connection.consumer_id || "N/A",
+      name: consumer.full_name || "N/A",
+      cnic: consumer.cnic || "N/A",
+      uc: property.uc || survey.uc || "N/A",
+      status: property.status || connection.connection_status || "N/A",
+      zone: property.zone || survey.zone || "N/A",
+      category: property.category || "N/A",
+      ward: property.ward || survey.ward || "N/A",
+      water_unit: connection.water_unit || "N/A",
+      fullData: entry,
+      releaseReason: "",
+      surveyedAt: survey.surveyed_at || entry.created_at || null,
+    };
+  };
+
+  useEffect(() => {
+    async function fetchData() {
+      try {
+        const res = await getAllSurveys();
+        const data = res?.data || [];
+
+        
+        const mappedQuick = data
+          .slice(-25) 
+          .reverse()
+          .map(mapSurveyEntry);
+
+        setTableData(mappedQuick);
+        setLoading(false);
+
+    
+        setTimeout(() => {
+          const mappedFull = data
+            .map(mapSurveyEntry)
+            .filter((row) => row.name !== "N/A" && row.cnic !== "N/A");
+
+          mappedFull.sort((a, b) => {
+            if (!a.surveyedAt) return 1;
+            if (!b.surveyedAt) return -1;
+            return new Date(b.surveyedAt) - new Date(a.surveyedAt);
+          });
+
+          setTableData(mappedFull);
+        }, 300); 
+      } catch (error) {
+        console.error(error);
+        setLoading(false);
+      }
+    }
+
+    fetchData();
   }, []);
 
   const handleFilterChange = (e) => {
@@ -50,56 +113,9 @@ export default function SurveyDetails() {
   };
 
   useEffect(() => {
-    async function fetchData() {
-      try {
-        const res = await getAllSurveys();
-        const data = res?.data || [];
-
-        const mappedData = data
-          .map((entry, i) => {
-            const consumer = entry?.consumer || {};
-            const property = entry?.property || {};
-            const connection = entry?.connection || {};
-            const survey = entry?.survey || {};
-
-            return {
-               old_code: consumer.old_code || "N/A",
-              cid: consumer.consumer_code || connection.consumer_id || "N/A",
-              name: consumer.full_name || "N/A",
-              cnic: consumer.cnic || "N/A",
-              uc: property.uc || survey.uc || "N/A",
-              status: property.status || connection.connection_status || "N/A",
-              zone: property.zone || survey.zone || "N/A",
-              category: property.category || "N/A",
-              ward: property.ward || survey.ward || "N/A",
-              water_unit: connection.water_unit || "N/A",
-              index: i,
-              fullData: entry,
-              releaseReason: "",
-              surveyedAt: survey.surveyed_at || entry.created_at || null,
-            };
-          })
-          .filter((row) => row.name !== "N/A" && row.cnic !== "N/A");
-
-       
-        mappedData.sort((a, b) => {
-          if (!a.surveyedAt) return 1;
-          if (!b.surveyedAt) return -1;
-          return new Date(b.surveyedAt) - new Date(a.surveyedAt);
-        });
-
-        setTableData(mappedData);
-      } catch (error) {
-        console.error(error);
-      }
-    }
-
-    fetchData();
-  }, []);
-
-  useEffect(() => {
     if (!tableData || tableData.length === 0) return;
     const $table = $(tableRef.current);
+
     if ($.fn.dataTable.isDataTable(tableRef.current)) {
       $table.DataTable().destroy();
     }
@@ -110,7 +126,7 @@ export default function SurveyDetails() {
       data: tableData,
       columns: [
         { title: "#", data: null, render: (data, type, row, meta) => meta.row + 1 },
-        {  title: "Old Consumer Code",  data: "old_code",  render: (data) => data ?? "N/A", },
+        { title: "Old Consumer Code", data: "old_code", render: (data) => data ?? "N/A" },
         { title: "Consumer ID", data: "cid" },
         { title: "Name", data: "name" },
         { title: "CNIC", data: "cnic" },
@@ -121,18 +137,18 @@ export default function SurveyDetails() {
         { title: "Ward", data: "ward" },
         { title: "Water Unit", data: "water_unit" },
         {
-          title: "Surveyed At", 
+          title: "Surveyed At",
           data: "surveyedAt",
           render: (data) => (data ? new Date(data).toLocaleString() : "N/A"),
         },
         {
           title: "Action",
-          data: "index",
+          data: "cid",
           orderable: false,
           render: (data, type, row) =>
             `<button class="view-btn text-black hover:text-blue-800" data-cid="${row.cid}">
-              <i class="fa-regular fa-eye" style="font-size: ${isLargeScreen ? '18px' : '10px'};"></i>
-            </button>`
+              <i class="fa-regular fa-eye" style="font-size: ${isLargeScreen ? "18px" : "10px"};"></i>
+            </button>`,
         },
       ],
       paging: true,
@@ -143,7 +159,7 @@ export default function SurveyDetails() {
       pageLength: pageLength,
       createdRow: function (row) {
         if (isLargeScreen) {
-          $(row).css("font-size", "1.125rem"); 
+          $(row).css("font-size", "1.125rem");
         }
       },
     });
@@ -184,10 +200,7 @@ export default function SurveyDetails() {
           .toArray()
           .find((i) => tableInstance.current.row(i).data().cid === id);
         if (rowNode !== undefined) {
-          tableInstance.current
-            .row(rowNode)
-            .data(updated[rowIndex])
-            .draw(false);
+          tableInstance.current.row(rowNode).data(updated[rowIndex]).draw(false);
         }
       }
 
@@ -202,47 +215,89 @@ export default function SurveyDetails() {
     setIsModalOpen(false);
   };
 
+  if (loading) {
+    return (
+      <div className="text-blue-600 text-lg flex items-center gap-2 justify-center mt-10">
+        Loading Data…
+      </div>
+    );
+  }
+
   return (
     <div className="px-4 py-2">
+  
       <div className="flex flex-wrap gap-4">
         <select
           name="category"
           value={filters.category}
           onChange={handleFilterChange}
-          className={`border rounded px-3 py-1 text-sm bg-transparent ${isLargeScreen ? "text-lg 2xl:text-xl" : ""}`}
+          className={`border rounded px-3 py-1 text-sm bg-transparent ${
+            isLargeScreen ? "text-lg 2xl:text-xl" : ""
+          }`}
         >
           <option value="">Category</option>
-          {[...new Set(tableData.map((d) => d.category))].sort().map((val) => <option key={val} value={val}>{val}</option>)}
+          {[...new Set(tableData.map((d) => d.category))]
+            .sort()
+            .map((val) => (
+              <option key={val} value={val}>
+                {val}
+              </option>
+            ))}
         </select>
         <select
           name="status"
           value={filters.status}
           onChange={handleFilterChange}
-          className={`border rounded px-3 py-1 text-sm bg-transparent ${isLargeScreen ? "text-lg 2xl:text-xl" : ""}`}
+          className={`border rounded px-3 py-1 text-sm bg-transparent ${
+            isLargeScreen ? "text-lg 2xl:text-xl" : ""
+          }`}
         >
           <option value="">Status</option>
-          {[...new Set(tableData.map((d) => d.status))].sort().map((val) => <option key={val} value={val}>{val}</option>)}
+          {[...new Set(tableData.map((d) => d.status))]
+            .sort()
+            .map((val) => (
+              <option key={val} value={val}>
+                {val}
+              </option>
+            ))}
         </select>
         <select
           name="ward"
           value={filters.ward}
           onChange={handleFilterChange}
-          className={`border rounded px-3 py-1 text-sm bg-transparent ${isLargeScreen ? "text-lg 2xl:text-xl" : ""}`}
+          className={`border rounded px-3 py-1 text-sm bg-transparent ${
+            isLargeScreen ? "text-lg 2xl:text-xl" : ""
+          }`}
         >
           <option value="">Ward No</option>
-          {[...new Set(tableData.map((d) => d.ward))].sort((a, b) => a - b).map((val) => <option key={val} value={val}>{val}</option>)}
+          {[...new Set(tableData.map((d) => d.ward))]
+            .sort((a, b) => a - b)
+            .map((val) => (
+              <option key={val} value={val}>
+                {val}
+              </option>
+            ))}
         </select>
         <button
           onClick={handleClearFilters}
-          className={`text-blue-600 py-1 rounded text-sm hover:text-blue-800 ${isLargeScreen ? "text-lg 2xl:text-xl" : ""}`}
+          className={`text-blue-600 py-1 rounded text-sm hover:text-blue-800 ${
+            isLargeScreen ? "text-lg 2xl:text-xl" : ""
+          }`}
         >
           Clear Filters
         </button>
       </div>
 
+    
       <div className="overflow-x-auto mt-4">
-        <table ref={tableRef} className={`display w-full text-sm text-gray-700 ${isLargeScreen ? "text-lg 2xl:text-xl" : ""}`}></table>
+        <table
+          ref={tableRef}
+          className={`display w-full text-sm text-gray-700 ${
+            isLargeScreen ? "text-lg 2xl:text-xl" : ""
+          }`}
+        ></table>
       </div>
+
 
       <ApprovalAction
         isOpen={isModalOpen}
@@ -251,8 +306,13 @@ export default function SurveyDetails() {
         onUpdateStatus={handleUpdateStatus}
       />
 
+   
       {toast && (
-        <div className={`fixed top-5 right-5 bg-green-100 text-black text-sm px-4 py-2 rounded shadow-lg animate-slide-in ${isLargeScreen ? "text-lg 2xl:text-xl" : ""}`}>
+        <div
+          className={`fixed top-5 right-5 bg-green-100 text-black text-sm px-4 py-2 rounded shadow-lg animate-slide-in ${
+            isLargeScreen ? "text-lg 2xl:text-xl" : ""
+          }`}
+        >
           {toast}
         </div>
       )}

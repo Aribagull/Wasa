@@ -18,12 +18,12 @@ export default function TicketModal({ ticket, onClose, onUpdate, allTickets = []
     if (!showOverlay) setFilter("chat");
   }, [showOverlay]);
 
-  const handleSend = () => {
-    if (input.trim() === "") return;
-    const newMessage = { role: "Admin", text: input, type: "new" };
-    setChatMessages((prev) => [...prev, newMessage]);
-    setInput("");
-  };
+  // const handleSend = () => {
+  //   if (input.trim() === "") return;
+  //   const newMessage = { role: "Admin", text: input, type: "new" };
+  //   setChatMessages((prev) => [...prev, newMessage]);
+  //   setInput("");
+  // };
 
   const handleApprove = async () => {
     setLoading(true);
@@ -59,14 +59,14 @@ export default function TicketModal({ ticket, onClose, onUpdate, allTickets = []
     }
   };
 
-  const handleReject = () => {
-    if (!showReasonBox) {
-      setShowReasonBox(true);
-      return;
-    }
-    if (rejectionReason.trim() === "") return;
-    onUpdate(ticket.survey_id, "Rejected", rejectionReason);
-  };
+  // const handleReject = () => {
+  //   if (!showReasonBox) {
+  //     setShowReasonBox(true);
+  //     return;
+  //   }
+  //   if (rejectionReason.trim() === "") return;
+  //   onUpdate(ticket.survey_id, "Rejected", rejectionReason);
+  // };
 
   return (
     <div className="flex flex-col h-full 2xl:h-screen 2xl:text-lg">
