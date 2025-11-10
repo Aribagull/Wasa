@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { FaUser, FaHome, FaPlug } from "react-icons/fa";
+import { FaHome, FaPlug } from "react-icons/fa";
 import { RiArrowDropDownLine, RiArrowDropUpLine } from "react-icons/ri";
 
 export default function ConsumerDetailCards({ consumer }) {
