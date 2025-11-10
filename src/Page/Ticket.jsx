@@ -105,7 +105,7 @@ export default function TicketTabs() {
 
       <div className="flex gap-4">
         {/* Ticket List */}
-        <div className={`bg-white p-4 overflow-y-auto custom-scrollbar ${isLargeScreen ? "h-screen" : "h-[520px]"} ${isLargeScreen ? "text-lg" : "text-sm"} w-1/2`}>
+        <div className={`bg-white p-4 overflow-y-auto custom-scrollbar ${isLargeScreen ? "h-screen" : "h-[580px]"} ${isLargeScreen ? "text-lg" : "text-sm"} w-1/2`}>
           {loading ? (
             <p className="text-gray-500">Loading tickets...</p>
           ) : error ? (

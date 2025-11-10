@@ -27,7 +27,7 @@ export default function SurveyDetails() {
   const handleFilterChange = (e) => {
     const { name, value } = e.target;
     setFilters((prev) => ({ ...prev, [name]: value }));
-    const columnMap = { category: 5, status: 4, ward: 8 };
+    const columnMap = { category: 6, status: 5, ward: 9 };
     const columnIndex = columnMap[name];
     tableInstance.current
       .column(columnIndex)
@@ -37,7 +37,7 @@ export default function SurveyDetails() {
 
   const handleClearFilters = () => {
     setFilters({ category: "", status: "", ward: "" });
-    const columnMap = { category: 5, status: 4, ward: 8 };
+    const columnMap = { category: 6, status: 5, ward: 9 };
     Object.values(columnMap).forEach((index) => {
       tableInstance.current.column(index).search("").draw();
     });
