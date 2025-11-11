@@ -20,6 +20,7 @@ export default function SurveyorManagement() {
 
   useEffect(() => {
     const updateItemsPerPage = () => {
+      setPage(1); // Reset page on resize
       if (window.innerWidth >= 1536) { 
         setItemsPerPage(20);
       } else {
@@ -29,7 +30,6 @@ export default function SurveyorManagement() {
 
     updateItemsPerPage(); 
     window.addEventListener("resize", updateItemsPerPage);
-
     return () => window.removeEventListener("resize", updateItemsPerPage);
   }, []);
 
@@ -41,7 +41,6 @@ export default function SurveyorManagement() {
         const sortedData = data.sort(
           (a, b) => new Date(b.created_at) - new Date(a.created_at)
         );
-
         setSurveyors(sortedData);
       } catch (error) {
         console.error("Error fetching surveyors:", error);
@@ -51,7 +50,6 @@ export default function SurveyorManagement() {
     };
     fetchSurveyors();
   }, []);
-
 
   const handleAddSurveyor = (newSurveyor) => {
     setSurveyors((prev) => [newSurveyor, ...prev]);
@@ -89,12 +87,11 @@ export default function SurveyorManagement() {
         </button>
       </div>
 
-
       <div className="relative my-4">
         <input
           type="text"
           placeholder="Search surveyors..."
-          className="w-full pl-4 pr-12 py-2 border border-gray-100 rounded 
+          className="w-full pl-4 pr-4 py-2 border border-gray-100 rounded 
                      text-sm 2xl:text-base 3xl:text-lg 
                      focus:outline-none focus:ring-1 focus:ring-blue-500
                      2xl:py-3 3xl:py-4"
@@ -104,15 +101,8 @@ export default function SurveyorManagement() {
             setPage(1);
           }}
         />
-        <div className="absolute top-0 right-0 h-full">
-          <button className="h-full px-3 bg-blue-600 hover:bg-blue-700 border-l border-gray-300 rounded-r flex items-center justify-center transition
-                       2xl:px-5 2xl:h-full 3xl:px-6 3xl:h-full">
-            <FiSearch className="text-white w-4 h-4 2xl:w-6 2xl:h-6 3xl:w-7 3xl:h-7" />
-          </button>
-        </div>
       </div>
 
- 
       <div className="bg-white overflow-x-auto">
         <table className="min-w-full">
           <thead className="text-left text-sm font-medium text-gray-600 
@@ -126,12 +116,14 @@ export default function SurveyorManagement() {
             </tr>
           </thead>
           <tbody className="text-sm text-gray-700 2xl:text-base 3xl:text-lg">
-            {currentSurveyors.map((item, index) => (
-              <tr key={index} className="border-t">
+            {currentSurveyors.map((item) => (
+              <tr key={item.user_id} className="border-t">
                 <td className="px-4 py-3 2xl:py-4 3xl:py-5">{item.full_name}</td>
                 <td className="px-4 py-3 2xl:py-4 3xl:py-5">{item.email}</td>
                 <td className="px-4 py-3 2xl:py-4 3xl:py-5">{item.phone}</td>
-                <td className="px-4 py-3 2xl:py-4 3xl:py-5">{item.created_at}</td>
+                <td className="px-4 py-3 2xl:py-4 3xl:py-5">
+                  {new Date(item.created_at).toLocaleDateString()}
+                </td>
                 <td className="px-4 py-3 2xl:py-4 3xl:py-5">
                   <span
                     className={`px-3 py-1 rounded-full text-xs font-medium 
@@ -158,8 +150,7 @@ export default function SurveyorManagement() {
         )}
       </div>
 
-  
-      {filteredSurveyors.length > itemsPerPage && (
+      {totalPages > 1 && (
         <div className="flex justify-end mt-4 gap-4">
           <button
             onClick={() => page > 1 && setPage(page - 1)}
@@ -186,7 +177,6 @@ export default function SurveyorManagement() {
         </div>
       )}
 
-     
       <CreateUserModal
         isModalOpen={isModalOpen}
         setIsModalOpen={setIsModalOpen}

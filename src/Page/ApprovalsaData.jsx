@@ -9,13 +9,15 @@ import { getAllSurveys } from "../API/index.js";
 export default function SurveyDetails() {
   const tableRef = useRef(null);
   const tableInstance = useRef(null);
-  const [filters, setFilters] = useState({ category: "", status: "", ward: "" });
+  const [filters, setFilters] = useState({ category: "", status: "", ward: "", uc: "" });
   const [tableData, setTableData] = useState([]);
   const [selectedRow, setSelectedRow] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [toast, setToast] = useState("");
   const [isLargeScreen, setIsLargeScreen] = useState(window.innerWidth >= 1536);
   const [loading, setLoading] = useState(true);
+  const [dateRange, setDateRange] = useState({ fromDate: "", toDate: "" });
+
 
   useEffect(() => {
     const handleResize = () => {
@@ -90,7 +92,7 @@ export default function SurveyDetails() {
   const handleFilterChange = (e) => {
     const { name, value } = e.target;
     setFilters((prev) => ({ ...prev, [name]: value }));
-    const columnMap = { category: 6, status: 5, ward: 9 };
+    const columnMap = { category: 6, status: 5, uc: 8, uc: 8, ward: 9 };
     const columnIndex = columnMap[name];
     tableInstance.current
       .column(columnIndex)
@@ -98,13 +100,54 @@ export default function SurveyDetails() {
       .draw();
   };
 
+const handleDateRangeFilter = (e) => {
+  const { name, value } = e.target;
+  setDateRange((prev) => {
+    const updated = { ...prev, [name]: value };
+
+    $.fn.dataTable.ext.search = [];
+
+    if (updated.fromDate || updated.toDate) {
+      $.fn.dataTable.ext.search.push(function (settings, data) {
+        const dateColumn = data[11];
+        if (!dateColumn || dateColumn === "N/A") return false;
+
+        const rowDate = new Date(dateColumn);
+        const from = updated.fromDate ? new Date(updated.fromDate) : null;
+        const to = updated.toDate ? new Date(updated.toDate) : null;
+        if (to) to.setHours(23, 59, 59, 999);
+
+        if (from && to) {
+          return rowDate >= from && rowDate <= to;
+        } else if (from) {
+          return rowDate >= from;
+        } else if (to) {
+          return rowDate <= to;
+        }
+        return true;
+      });
+    }
+
+    tableInstance.current.draw();
+    return updated;
+  });
+};
+
+
   const handleClearFilters = () => {
-    setFilters({ category: "", status: "", ward: "" });
-    const columnMap = { category: 6, status: 5, ward: 9 };
-    Object.values(columnMap).forEach((index) => {
-      tableInstance.current.column(index).search("").draw();
-    });
+  setFilters({ category: "", status: "", uc: "", ward: "" });
+  const columnMap = { category: 6, status: 5, uc: 8, ward: 9 };
+  Object.values(columnMap).forEach((index) => {
+    tableInstance.current.column(index).search("").draw();
+  });
+  setDateRange({ fromDate: "", toDate: "" });
+  document.querySelector('input[name="fromDate"]').value = "";
+  document.querySelector('input[name="toDate"]').value = "";
+  $.fn.dataTable.ext.search = [];
+  tableInstance.current.draw();
   };
+
+
 
   const saveTicketToLocalStorage = (ticket) => {
     const existing = JSON.parse(localStorage.getItem("tickets") || "[]");
@@ -215,14 +258,6 @@ export default function SurveyDetails() {
     setIsModalOpen(false);
   };
 
-  if (loading) {
-    return (
-      <div className="text-blue-600 text-lg flex items-center gap-2 justify-center mt-10">
-        Loading Data…
-      </div>
-    );
-  }
-
   return (
     <div className="px-4 py-2">
   
@@ -278,6 +313,44 @@ export default function SurveyDetails() {
               </option>
             ))}
         </select>
+        <select
+  name="uc"
+  value={filters.uc}
+  onChange={handleFilterChange}
+  className={`border rounded px-3 py-1 text-sm bg-transparent ${
+    isLargeScreen ? "text-lg 2xl:text-xl" : ""
+  }`}
+>
+  <option value="">UC</option>
+  {[...new Set(tableData.map((d) => d.uc))]
+    .sort()
+    .map((val) => (
+      <option key={val} value={val}>
+        {val}
+      </option>
+    ))}
+</select>
+
+         <div className="flex items-center gap-2 border rounded px-3 py-1 bg-white">
+  <label className="text-gray-600 text-sm font-medium">Date Range:</label>
+  <input
+    type="date"
+    name="fromDate"
+    value={dateRange.fromDate}
+    onChange={handleDateRangeFilter}
+    className="border rounded px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+  />
+  <span className="text-gray-500">to</span>
+  <input
+    type="date"
+    name="toDate"
+    value={dateRange.toDate}
+    onChange={handleDateRangeFilter}
+    className="border rounded px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+  />
+</div>
+
+
         <button
           onClick={handleClearFilters}
           className={`text-blue-600 py-1 rounded text-sm hover:text-blue-800 ${
@@ -289,6 +362,14 @@ export default function SurveyDetails() {
       </div>
 
     
+        {loading && (
+  <div className="flex justify-center items-center mt-10">
+    <div className="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+  </div>
+)}
+
+
+    {!loading && (
       <div className="overflow-x-auto mt-4">
         <table
           ref={tableRef}
@@ -297,7 +378,7 @@ export default function SurveyDetails() {
           }`}
         ></table>
       </div>
-
+    )}
 
       <ApprovalAction
         isOpen={isModalOpen}

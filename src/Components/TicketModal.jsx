@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import TicketUserInfo from "./TicketUserInfo";
-import { approveSurvey, closeTicket } from "../API/index.js";
+import { closeTicket } from "../API/index.js";
 import ChatBox from "./ChatBox.jsx";
 
 export default function TicketModal({ ticket, onClose, onUpdate, allTickets = [] }) {
@@ -17,13 +17,6 @@ export default function TicketModal({ ticket, onClose, onUpdate, allTickets = []
   useEffect(() => {
     if (!showOverlay) setFilter("chat");
   }, [showOverlay]);
-
-  // const handleSend = () => {
-  //   if (input.trim() === "") return;
-  //   const newMessage = { role: "Admin", text: input, type: "new" };
-  //   setChatMessages((prev) => [...prev, newMessage]);
-  //   setInput("");
-  // };
 
   const handleApprove = async () => {
     setLoading(true);
@@ -45,12 +38,6 @@ export default function TicketModal({ ticket, onClose, onUpdate, allTickets = []
 
       surveyTickets.forEach((t) => onUpdate(t.ticket_id, "Approved"));
 
-      const approveResult = await approveSurvey(surveyId);
-      if (!approveResult.success) {
-        setError(approveResult.error || "Failed to approve survey.");
-        return;
-      }
-
       onClose();
     } catch (err) {
       setError(err.message);
@@ -59,14 +46,6 @@ export default function TicketModal({ ticket, onClose, onUpdate, allTickets = []
     }
   };
 
-  // const handleReject = () => {
-  //   if (!showReasonBox) {
-  //     setShowReasonBox(true);
-  //     return;
-  //   }
-  //   if (rejectionReason.trim() === "") return;
-  //   onUpdate(ticket.survey_id, "Rejected", rejectionReason);
-  // };
 
   return (
     <div className="flex flex-col h-full 2xl:h-screen 2xl:text-lg">

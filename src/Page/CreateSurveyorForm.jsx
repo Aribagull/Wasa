@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react"; 
-import { createSupervisor, getSurveyors } from "../API/index.js";
+import { createSupervisor } from "../API/index.js";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
 
 export default function CreateUserModal({ isModalOpen, setIsModalOpen, setUsers, role }) {
@@ -7,7 +7,7 @@ export default function CreateUserModal({ isModalOpen, setIsModalOpen, setUsers,
   const [toastMessage, setToastMessage] = useState(""); 
   const [toastType, setToastType] = useState("success"); 
   const [showPassword, setShowPassword] = useState(false);
-  const [isLargeScreen, setIsLargeScreen] = useState(window.innerWidth >= 1536); 
+  const [isLargeScreen, setIsLargeScreen] = useState(false); 
 
   const [newUser, setNewUser] = useState({
     username: "",
@@ -23,11 +23,13 @@ export default function CreateUserModal({ isModalOpen, setIsModalOpen, setUsers,
 
 
   useEffect(() => {
+    setIsLargeScreen(window.innerWidth >= 1536);
     const handleResize = () => setIsLargeScreen(window.innerWidth >= 1536);
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
+ 
   const isEmailValid = (email) => /\S+@\S+\.\S+/.test(email);
   const isPhoneValid = (phone) => /^\d{11}$/.test(phone);
   const isFormValid = () =>
@@ -36,45 +38,61 @@ export default function CreateUserModal({ isModalOpen, setIsModalOpen, setUsers,
     isEmailValid(newUser.email) &&
     newUser.password.trim() !== "";
 
+ 
   const handleCreate = async () => {
     if (!isFormValid()) {
       setToastMessage("Please correct the form fields.");
       setToastType("error");
       return;
     }
+
     setLoading(true);
-     try {
-    const response = await createSupervisor(newUser);
-    const { data, status } = response;
-    if (data.success && (status === 200 || status === 201)) {
-  setUsers({
-    id: data.user_id,
-    username: newUser.username,
-    full_name: newUser.full_name,
-    email: newUser.email,
-    phone: newUser.phone,
-    status: newUser.status,
-    role_id: newUser.role_id,
-    created_at: new Date().toISOString(), 
-  });
+    try {
+      const response = await createSupervisor(newUser);
+      const { data, status } = response;
 
-  setToastMessage(`${role.charAt(0).toUpperCase() + role.slice(1)} created successfully!`);
-  setToastType("success");
-  setNewUser({ username: "", email: "", password: "", full_name: "", phone: "", status: "active", role_id: newUser.role_id });
-  setIsModalOpen(false);
-} else {
-      setToastMessage(data.message || "User creation failed.");
+      if (data.success && (status === 200 || status === 201)) {
+       
+        setUsers(prevUsers => [
+          ...prevUsers,
+          {
+            id: data.user_id,
+            username: newUser.username,
+            full_name: newUser.full_name,
+            email: newUser.email,
+            phone: newUser.phone,
+            status: newUser.status,
+            role_id: newUser.role_id,
+            created_at: new Date().toISOString(),
+          }
+        ]);
+
+        setToastMessage(`${role.charAt(0).toUpperCase() + role.slice(1)} created successfully!`);
+        setToastType("success");
+        setNewUser({
+          username: "",
+          email: "",
+          password: "",
+          full_name: "",
+          phone: "",
+          status: "active",
+          role_id: newUser.role_id,
+        });
+        setIsModalOpen(false);
+      } else {
+        setToastMessage(data.message || "User creation failed.");
+        setToastType("error");
+      }
+    } catch (error) {
+      console.error("Create User Error:", error);
+      setToastMessage("Network error while creating user.");
       setToastType("error");
+    } finally {
+      setLoading(false);
     }
-  } catch (error) {
-    console.error("Create User Error:", error);
-    setToastMessage("Network error while creating user.");
-    setToastType("error");
-  } finally {
-    setLoading(false);
-  }
-};
+  };
 
+ 
   useEffect(() => {
     if (toastMessage) {
       const timer = setTimeout(() => setToastMessage(""), 3000);
@@ -85,16 +103,17 @@ export default function CreateUserModal({ isModalOpen, setIsModalOpen, setUsers,
   return (
     <>
       {isModalOpen && (
-        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-30 z-50"
-         onClick={() => setIsModalOpen(false)}
-         >
-          
+        <div
+          className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-30 z-50"
+          onClick={() => setIsModalOpen(false)}
+        >
           <div
             className={`bg-white rounded shadow-lg relative max-w-full ${
               isLargeScreen ? "w-[800px] p-10" : "w-[500px] p-6"
             }`}
-             onClick={(e) => e.stopPropagation()}
+            onClick={(e) => e.stopPropagation()}
           >
+           
             <button
               onClick={() => setIsModalOpen(false)}
               className={`absolute top-2 right-2 font-bold text-gray-500 hover:text-gray-800 ${
@@ -109,6 +128,7 @@ export default function CreateUserModal({ isModalOpen, setIsModalOpen, setUsers,
             </h3>
 
             <div className={`grid grid-cols-2 gap-4 mb-4 ${isLargeScreen ? "gap-6" : ""}`}>
+             
               <div>
                 <label className={`block mb-1 font-medium ${isLargeScreen ? "text-lg" : "text-sm"}`}>Username</label>
                 <input
@@ -120,6 +140,7 @@ export default function CreateUserModal({ isModalOpen, setIsModalOpen, setUsers,
                 />
               </div>
 
+             
               <div>
                 <label className={`block mb-1 font-medium ${isLargeScreen ? "text-lg" : "text-sm"}`}>Full Name</label>
                 <input
@@ -131,6 +152,7 @@ export default function CreateUserModal({ isModalOpen, setIsModalOpen, setUsers,
                 />
               </div>
 
+       
               <div>
                 <label className={`block mb-1 font-medium ${isLargeScreen ? "text-lg" : "text-sm"}`}>Phone</label>
                 <input

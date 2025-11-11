@@ -48,28 +48,28 @@ export default function TicketTabs() {
     .filter((t) => t.status?.toLowerCase() === "open")
     .sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
 
-  const handleUpdate = async (ticketId, status, reason, issue) => {
-    if (status === "Approved") {
-      const res = await closeTicket(ticketId);
-      if (!res.success) {
-        alert(res.error);
-        return;
-      }
+ const handleUpdate = async (ticketId, status, reason, issue, userId) => {
+  if (status === "Approved") {
+    const res = await closeTicket(ticketId, userId); 
+    if (!res.success) {
+      alert(res.error);
+      return;
     }
+  }
 
-    const updated = allTickets.map((t) =>
-      t.ticket_id === ticketId
-        ? {
-            ...t,
-            status,
-            ...(reason ? { releaseReason: reason } : {}),
-            ...(issue ? { issue } : {}),
-          }
-        : t
-    );
-    setAllTickets(updated);
-    setSelectedTicket(null);
-  };
+  const updated = allTickets.map((t) =>
+    t.ticket_id === ticketId
+      ? {
+          ...t,
+          status,
+          ...(reason ? { releaseReason: reason } : {}),
+          ...(issue ? { issue } : {}),
+        }
+      : t
+  );
+  setAllTickets(updated);
+  setSelectedTicket(null);
+};
 
   return (
     <div className="py-4 px-4">

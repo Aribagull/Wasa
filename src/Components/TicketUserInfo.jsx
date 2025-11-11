@@ -56,8 +56,6 @@ export default function TicketUserInfo({ filter, ticket }) {
   const renderSection = (sectionName, obj) => {
     if (!obj || Object.keys(obj).length === 0) return null;
 
-   if (!obj || Object.keys(obj).length === 0) return null;
-
   let priorityOrder = [];
   if (sectionName === "consumer") {
     priorityOrder = ["full_name", "cnic", "phone", "consumer_id", "old_code"];

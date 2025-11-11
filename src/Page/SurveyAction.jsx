@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { BiSolidUserDetail } from "react-icons/bi";
-import { releaseTicket } from "../API/index.js";
+import { releaseTicket, approveSurvey } from "../API/index.js";
 import { domesticCategories, commercialCategories } from "../Data/Categories.js";
 
 export default function ApprovalAction({ isOpen, onClose, row, onUpdateStatus }) {
@@ -156,17 +156,27 @@ export default function ApprovalAction({ isOpen, onClose, row, onUpdateStatus })
     }
   };
 
-  const handleApprove = () => {
-    onUpdateStatus(
-      consumer.consumer_code,
-      "Approved",
-      null,
-      null,
-      "Ticket approved successfully!"
-    );
-    showToast("Ticket approved successfully!", "success");
-    onClose();
-  };
+  const handleApprove = async () => {
+  try {
+    const result = await approveSurvey(survey_id);
+    if (result.success) {
+      onUpdateStatus(
+        consumer.consumer_code,
+        "Approved",
+        null,
+        result.data,
+        "Ticket approved successfully!"
+      );
+      showToast("Ticket approved successfully!", "success");
+      onClose();
+    } else {
+      showToast(result.error || "Failed to approve ticket.", "error");
+    }
+  } catch (err) {
+    showToast("Unexpected error while approving ticket.", "error");
+  }
+};
+
 
   const handleImageClick = (url) => {
     setFullscreenImage(url);

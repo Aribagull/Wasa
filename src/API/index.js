@@ -116,11 +116,15 @@ export async function approveSurvey(surveyId) {
   }
 }
 
+
+
+
 // CLOSE TICKET
-export async function closeTicket(ticketId) {
+export async function closeTicket(ticketId, userId) {
   try {
     const response = await axiosInstance.patch(`/tickets/${ticketId}/close`, {
       closed_at: new Date().toISOString(),
+      user_id: userId, 
     });
     return { success: true, data: response.data };
   } catch (error) {
@@ -130,6 +134,7 @@ export async function closeTicket(ticketId) {
     };
   }
 }
+
 
 
 // GET Massage

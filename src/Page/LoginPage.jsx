@@ -21,57 +21,42 @@ export default function LoginPage() {
     try {
       const data = await loginUser({ email, password });
 
-      if (data?.success) {
-  const userData = {
-    email: data.user.email,
-    full_name: data.user.full_name,
-    phone: data.user.phone,
-    role: data.user.role.role_name, 
-    role_id: data.user.role.role_id,
-    user_id: data.user.user_id,
-    status: data.user.status,
-  };
+      if (data?.success && data.user) {
+        const userData = {
+          email: data.user.email || "",
+          full_name: data.user.full_name || "",
+          phone: data.user.phone || "",
+          role: data.user.role?.role_name || "",
+          role_id: data.user.role?.role_id || "",
+          user_id: data.user.user_id || "",
+          status: data.user.status || "",
+        };
 
-  
-  setUser(userData);
-  setToken(data.token);
-  localStorage.setItem("user", JSON.stringify(userData));
-  localStorage.setItem("authToken", data.token);
+        setUser(userData);
+        setToken(data.token);
+        localStorage.setItem("user", JSON.stringify(userData));
+        localStorage.setItem("authToken", data.token);
 
- 
-  if (userData.role.toLowerCase() === "super admin") {
-    navigate("/dashboard"); 
-  } else if (userData.role.toLowerCase() === "supervisor") {
-    navigate("/dashboard"); 
-  } else {
-    navigate("/dashboard"); 
-  }
-}
-else {
+        navigate("/dashboard");
+      } else {
         setError(data?.message || 'Invalid credentials');
       }
     } catch (err) {
-      setError(err.message);
+      setError(err.message || 'Network error');
     }
   };
 
   const handleRoleLogin = (role) => {
-  const mockUser = {
-    email: role === 'admin' ? 'admin@wasa.com' : 'supervisor@wasa.com',
-    role: role,
+    const mockUser = {
+      email: role === 'admin' ? 'admin@wasa.com' : 'supervisor@wasa.com',
+      role: role.toLowerCase(),
+    };
+    localStorage.setItem('user', JSON.stringify(mockUser));
+    setUser(mockUser);
+    setToken('mock-token');
+
+    navigate("/dashboard");
   };
-  localStorage.setItem('user', JSON.stringify(mockUser));
-  setUser(mockUser);
-  setToken('mock-token'); 
-
- if (mockUser.role === "Super Admin") {
-  navigate("/dashboard"); 
-} else if (mockUser.role === "Supervisor") {
-  navigate("/dashboard"); 
-}
-
-};
-
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-blue-100 to-white flex items-center justify-center">
@@ -125,7 +110,11 @@ else {
           </div>
 
           <div className="text-right">
-            <a href="#" className="text-sm text-gray-500 hover:underline hover:text-blue-700">
+            <a
+              href="#"
+              onClick={(e) => e.preventDefault()}
+              className="text-sm text-gray-500 hover:underline hover:text-blue-700"
+            >
               Forgot password?
             </a>
           </div>
